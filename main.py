@@ -25,8 +25,8 @@ def main():
     rom = ROM(rom_bytes)
 
     # create cpu
-    cpu = CPU()
-    cpu.load_rom(rom)
+    cpu: CPU = CPU()
+    cpu.start_up()
     cpu.run_rom(rom)
 
 
