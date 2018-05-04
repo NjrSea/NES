@@ -1,5 +1,4 @@
 import argparse
-from instruction import Instruction, LDAInstruction
 
 from cpu import CPU
 from rom import ROM
