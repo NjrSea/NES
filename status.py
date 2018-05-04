@@ -16,16 +16,11 @@ class Status:
     |            or D6 from last BIT
     +--------- Negative: Set to bit 7 of the last operation
     """
-    def __init__(self, initial_value: bytes):
-        self.reg = initial_value  # type: bytes
+    def __init__(self):
+        self.negative = False  # type: bool
+        self.overflow = False  # type: bool
+        self.decimal = False  # type: bool
+        self.interrupt = True  # type: bool
+        self.zero = False  # type: bool
+        self.carry = False  # type: bool
 
-    def interruptable(self) -> bool:
-        return not bool((self.reg[0] >> 2) & 1)
-
-    def set_interruptable(self, interruptable: bool):
-        if interruptable:
-            # set the second bit to 0
-            self.reg[0] &= 3
-        else:
-            # set the second bit to 1
-            self.reg[0] |= 4
