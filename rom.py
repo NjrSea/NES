@@ -14,8 +14,8 @@ class ROM(object):
         self.prg_bytes = rom_bytes[self.header_size:
                                    self.header_size + 16 * KB_SIZE * self.num_prg_blocks]
 
-    def get_byte(self, position: int) -> bytes:
+    def get_bytes(self, position: int, size: int=1) -> bytes:
         """
         gets byte at given position
         """
-        return self.rom_bytes[position:position + 1]
+        return self.rom_bytes[position:position + size]
