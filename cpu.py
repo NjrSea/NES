@@ -1,10 +1,13 @@
 from instruction import Instruction, LDAImmInstruction, SEIInstruction, CLDInstruction, STAAbsInstruction
+from memory_owner import MemoryOwnerMixin
+from ram import RAM
+from ppu import PPU
 from rom import ROM
 from status import Status
 
 
 class CPU:
-    def __init__(self):
+    def __init__(self, ram: RAM, ppu: PPU):
         # status registers: store a single byte
         self.status_reg = None   # type: Status
 
@@ -33,6 +36,13 @@ class CPU:
             self.instruction_mapping[instruction_class.identifier_byte] = instruction_class
 
         self.rom = None
+        self.ram = ram
+        self.ppu = ppu
+
+        self.memory_owners = [  # type: List[MemoryOwnerMixin]
+            self.ram,
+            self.ppu,
+        ]
 
     def start_up(self):
         """
@@ -54,6 +64,16 @@ class CPU:
         self.a_reg = 0
 
         # TODO memory sets
+
+    def get_memory_owner(self, location: int) -> MemoryOwnerMixin:
+        """
+        return the owner of a memory location
+        """
+        for memory_owner in self.memory_owners:
+            if memory_owner.memory_start_location <= location <= memory_owner.memory_end_location:
+                return memory_owner
+
+        raise Exception('Cannot find memory owner')
 
     def run_rom(self, rom: ROM):
         # load rom

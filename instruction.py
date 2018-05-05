@@ -64,4 +64,10 @@ class STAAbsInstruction(Instruction):
 
     def execute(self, cpu, data_bytes):
         # take value from A register and put it in memory
-        memory_address = data_bytes[1:2] + data_bytes[0:1]  # plus to convert endianess
+        memory_address = int.from_bytes(data_bytes, byteorder='little')
+        val_to_store = cpu.a_reg
+        memory_owner = cpu.get_memory_owner(memory_address)
+        memory_owner.set_byte(memory_address, val_to_store)
+
+
+
