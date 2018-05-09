@@ -1,0 +1,6 @@
+[
+  "test_instructions.py::test_lda_imm",
+  "test_instructions.py::test_sta_abs",
+  "test_instructions.py::test_sei",
+  "test_instructions.py::test_cld"
+]
