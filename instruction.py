@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod, abstractproperty
 from typing import Optional, List
 
 import cpu
-from adressing import NoAddressingMixin, ImmediateReadAddressingMixin, AbsoluteAddressingMixin
+from addressing import NoAddressingMixin, ImmediateReadAddressingMixin, AbsoluteAddressingMixin
 
 """
 Finished Instructions
