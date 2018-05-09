@@ -6,18 +6,13 @@ KB = 1024
 
 
 class RAM(MemoryOwnerMixin, object):
+    memory_start_location = 0x0
+    memory_end_location = 0x1FFF
+
     def __init__(self):
         # TODO byte vs int?
-        zero_byte = bytes.fromhex('00')
-        self.memory = [zero_byte] * KB * 2  # type: List[int]
+        self.memory = [0] * KB * 2  # type: List[int]
 
-    def get_memory(self) -> List[bytes]:
+    def get_memory(self) -> List[int]:
         return self.memory
 
-    @property
-    def memory_start_location(self):
-        return 0x0
-
-    @property
-    def memory_end_location(self):
-        return 0x1FFF

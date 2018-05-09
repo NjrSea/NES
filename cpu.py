@@ -56,7 +56,7 @@ class CPU:
         $4000-$400F: 0 (sound registers) """
         self.pc_reg = 0
         self.status_reg = Status()
-        self.sp_reg = bytes.fromhex('FD')
+        self.sp_reg = 0xFD
 
         # TODO change to int?
         self.x_reg = 0
@@ -69,6 +69,12 @@ class CPU:
         """
         return the owner of a memory location
         """
+        if location is None:
+            raise Exception('invalid location')
+
+        if self.rom.memory_start_location <= location <= self.rom.memory_end_location:
+            return self.rom
+
         for memory_owner in self.memory_owners:
             if memory_owner.memory_start_location <= location <= memory_owner.memory_end_location:
                 return memory_owner
@@ -84,7 +90,7 @@ class CPU:
         self.running = True
         while self.running:
             # get the current byte at pc
-            identifier_byte = self.rom.get_bytes(self.pc_reg)
+            identifier_byte = self.rom.get(self.pc_reg)
 
             # turn the byte into an Instruction
             # mapping[identifier_byte] will crash if identifier_byte is not valid
@@ -95,14 +101,13 @@ class CPU:
 
             # get the correct amount of data bytes
             num_data_bytes = instruction.instruction_length - 1
+
             # get the data bytes
-            data_bytes = self.rom.get_bytes(self.pc_reg + 1, num_data_bytes)
+            data_bytes = self.rom.get(self.pc_reg + 1, num_data_bytes)
 
             # we have a valid instruction
             instruction.execute(self, data_bytes)
 
             self.pc_reg += instruction.instruction_length
 
-    def process_instruction(self, instruction: Instruction):
-        instruction.execute()
 

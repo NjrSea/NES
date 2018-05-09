@@ -4,34 +4,34 @@ from abc import abstractmethod, ABC, abstractproperty
 
 class MemoryOwnerMixin(ABC):
     @abstractproperty
-    def memory_start_location(self):
+    @property
+    def memory_start_location(self) -> int:
         """
         inclusive
         """
         pass
 
     @abstractproperty
-    def memory_end_location(self):
+    @property
+    def memory_end_location(self) -> int:
         """
         inclusive
         """
         pass
 
     @abstractmethod
-    def get_memory(self) -> List[bytes]:
+    def get_memory(self) -> List[int]:
         pass
 
-    def get_bytes(self, position: int, size: int = 1) -> bytes:
+    def get(self, position: int) -> int:
         """
-        get byte at given position and size
+        get bytes at given position and size, could be multiple bytes
         """
-        return self.get_memory()[position : position + size]
+        return self.get_memory()[position - self.memory_start_location]
 
-    def set_byte(self, position: int, value: bytes):
+    def set(self, position: int, value: int):
         """
-        gets bytes at given position
+        gets int at given position
         """
-        if len(value) > 1:
-            raise Exception("Trying to store multiple bytes")
-        self.get_memory()[position] = value
+        self.get_memory()[position - self.memory_start_location] = value
 

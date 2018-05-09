@@ -6,6 +6,9 @@ KB_SIZE = 1024
 
 
 class ROM(MemoryOwnerMixin, object):
+    memory_start_location = 0x4020
+    memory_end_location = 0xFFFF
+
     def __init__(self, rom_bytes: bytes):
         self.header_size = 16
 
@@ -21,17 +24,12 @@ class ROM(MemoryOwnerMixin, object):
     def get_memory(self) -> List[bytes]:
         return self.rom_bytes
 
-    def set_byte(self, position: int, value: bytes):
+    def get(self, position: int, size: int=1) -> bytes:
+        return self.get_memory()[position:position+size]
+
+    def set(self, position: int, value: bytes):
         """
         read only memory
         """
         raise Exception('Trying to write to Read only Memory')
-
-    @property
-    def memory_start_location(self):
-        return 0x4020
-
-    @property
-    def memory_end_location(self):
-        return 0xFFFF
 
