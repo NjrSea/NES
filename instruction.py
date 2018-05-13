@@ -1,97 +1,74 @@
-from abc import ABC, abstractmethod, abstractproperty
-from typing import Optional, List
-
-import cpu
-from addressing import NoAddressingMixin, ImmediateReadAddressingMixin, AbsoluteAddressingMixin
-
-"""
-Finished Instructions
-
-LDA #
-
-SEI
-CLD
-"""
+from addressing import ImmediateReadAddressing, AbsoluteAddressing, IndexedIndirectAddressing, ZeroPageAddressing, \
+    ZeroPageAddressingWithX, AbsoluteAddressingYOffset, AbsoluteAddressingXOffset, IndirectIndexedAddressing
+from base_instructions import Lda, Ldx, Ldy, Sta, SetBit, ClearBit
+from generic_instruction import register
+from status import Status
 
 
-class Instruction(ABC):
-    def __init__(self):
-        pass
-
-    def __str__(self):
-        return '{}, Identifier byte: {}'.format(self.__class__.__name__,
-                                                self.identifier_byte.hex())
-
-    @property
-    def writes_to_memory(self) -> bool:
-        return False
-
-    @abstractproperty
-    @property
-    def identifier_byte(self) -> bytes:
-        return None
-
-    def apply_side_effects(self, cpu: 'cpu.CPU'):
-        pass
-
-    def get_address(self, data_bytes) -> Optional[int]:
-        return None
-
-    def get_data(self, cpu: 'cpu.CPU', memory_address: int, data_bytes) -> Optional[int]:
-        return None
-
-    def write(self, cpu: 'cpu.CPU', memory_address, value):
-        if self.writes_to_memory:
-            memory_owner = cpu.get_memory_owner(memory_address)
-            memory_owner.set(memory_address, value)
-
-    def execute(self, cpu: 'cpu.CPU', data_bytes: bytes):
-        memory_address = self.get_address(data_bytes)
-
-        value = self.get_data(cpu, memory_address, data_bytes)
-
-        self.write(cpu, memory_address, value)
-
-        self.apply_side_effects(cpu)
-
-
-# data instructions
-class LDAImmInstruction(ImmediateReadAddressingMixin, Instruction):
-    """
-    Load Accumulator with Memory
-    """
+# Lda
+@register
+class LdaImm(ImmediateReadAddressing, Lda):
     identifier_byte = bytes([0xA9])
 
-    def write(self, cpu: 'cpu.CPU', memory_address, value):
-        cpu.a_reg = value
+
+@register
+class LdaIndexedIndirect(IndexedIndirectAddressing, Lda):
+    identifier_byte = bytes([0xA1])
 
 
-class STAAbsInstruction(AbsoluteAddressingMixin, Instruction):
+@register
+class LdaZeroPage(ZeroPageAddressing, Lda):
+    identifier_byte = bytes([0xA5])
+
+
+@register
+class LdaZeroPageX(ZeroPageAddressingWithX, Lda):
+    identifier_byte = bytes([0xB5])
+
+
+@register
+class LdaAbs(AbsoluteAddressing, Lda):
+    identifier_byte = bytes([0xAD])
+
+
+@register
+class LdaAbsY(AbsoluteAddressingYOffset, Lda):
+    identifier_byte = bytes([0xB9])
+
+
+@register
+class LdaAbsX(AbsoluteAddressingXOffset, Lda):
+    identifier_byte = bytes([0xBD])
+
+
+@register
+class LdaIndirectIndexed(IndirectIndexedAddressing, Lda):
+    identifier_byte = bytes([0xB1])
+
+
+@register
+class LdxImm(ImmediateReadAddressing, Ldx):
+    identifier_byte = bytes([0xA2])
+
+
+@register
+class LdyImm(ImmediateReadAddressing, Ldy):
+    identifier_byte = bytes([0xA0])
+
+
+@register
+class StaAbs(AbsoluteAddressing, Sta):
     identifier_byte = bytes([0x8D])
-    writes_to_memory = True
-
-    def get_data(self, cpu: 'cpu.CPU', memory_address, data_bytes) -> Optional[int]:
-        return cpu.a_reg
 
 
 # status instructions
-class SEIInstruction(NoAddressingMixin, Instruction):
-    """
-    Set Interrupt Disable Status
-    """
+@register
+class Sei(SetBit):
     identifier_byte = bytes([0x78])
-
-    def apply_side_effects(self, cpu: 'cpu.CPU'):
-        # set the instruction flag to 1
-        cpu.status_reg.interrupt = True
+    bit = Status.StatusTypes.interrupt
 
 
-class CLDInstruction(NoAddressingMixin, Instruction):
-    """
-    Clear Decimal Mode
-    """
+@register
+class Cld(ClearBit):
     identifier_byte = bytes([0xD8])
-
-    def apply_side_effects(self, cpu: 'cpu.CPU'):
-        cpu.status_reg.decimal = False
-
+    bit = Status.StatusTypes.decimal

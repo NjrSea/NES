@@ -1,4 +1,4 @@
-from instruction import Instruction, LDAImmInstruction, SEIInstruction, CLDInstruction, STAAbsInstruction
+from instruction import Instruction, instructions
 from memory_owner import MemoryOwnerMixin
 from ram import RAM
 from ppu import PPU
@@ -22,18 +22,6 @@ class CPU:
 
         # program counter stores current execution point
         self.running = False
-
-        self.instructions = [
-            SEIInstruction(),
-            CLDInstruction(),
-            LDAImmInstruction(),
-            STAAbsInstruction(),
-        ]
-
-        self.instruction_mapping = dict()
-
-        for instruction_class in self.instructions:
-            self.instruction_mapping[instruction_class.identifier_byte] = instruction_class
 
         self.rom = None
         self.ram = ram
@@ -65,6 +53,13 @@ class CPU:
 
         # TODO memory sets
 
+    def get_memory(self, location: int) -> int:
+        """
+        return a byte from a given memory location
+        """
+        memory_owner = self.get_memory_owner(location)
+        return memory_owner.get(location)
+
     def get_memory_owner(self, location: int) -> MemoryOwnerMixin:
         """
         return the owner of a memory location
@@ -95,19 +90,16 @@ class CPU:
             # turn the byte into an Instruction
             # mapping[identifier_byte] will crash if identifier_byte is not valid
             # get method with default value of None can get value safely
-            instruction: Instruction = self.instruction_mapping.get(identifier_byte, None)
+            instruction: Instruction = instructions.get(identifier_byte, None)
             if instruction is None:
                 raise Exception("Instruction not found")
 
-            # get the correct amount of data bytes
-            num_data_bytes = instruction.instruction_length - 1
-
             # get the data bytes
-            data_bytes = self.rom.get(self.pc_reg + 1, num_data_bytes)
+            data_bytes = self.rom.get(self.pc_reg + 1, instruction.data_length)
 
             # we have a valid instruction
             instruction.execute(self, data_bytes)
 
-            self.pc_reg += instruction.instruction_length
+            self.pc_reg += instruction.get_instruction_length()
 
 
