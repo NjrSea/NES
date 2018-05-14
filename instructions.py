@@ -1,74 +1,87 @@
 from addressing import ImmediateReadAddressing, AbsoluteAddressing, IndexedIndirectAddressing, ZeroPageAddressing, \
-    ZeroPageAddressingWithX, AbsoluteAddressingYOffset, AbsoluteAddressingXOffset, IndirectIndexedAddressing
-from base_instructions import Lda, Ldx, Ldy, Sta, SetBit, ClearBit
-from generic_instruction import register
+    ZeroPageAddressingWithX, ZeroPageAddressingWithY, AbsoluteAddressingYOffset, AbsoluteAddressingXOffset, \
+    IndirectIndexedAddressing
+from base_instructions import Jmp, Jsr, Lda, Ldx, Ldy, Sta, Stx, SetBit, ClearBit
 from status import Status
 
 
+# Jmp
+class JmpAbs(AbsoluteAddressing, Jmp):
+    identifier_byte = bytes([0x4C])
+
+
+# Jsr
+class JsrAbs(AbsoluteAddressing, Jsr):
+    identifier_byte = bytes([0x20])
+
+
 # Lda
-@register
 class LdaImm(ImmediateReadAddressing, Lda):
     identifier_byte = bytes([0xA9])
 
 
-@register
 class LdaIndexedIndirect(IndexedIndirectAddressing, Lda):
     identifier_byte = bytes([0xA1])
 
 
-@register
 class LdaZeroPage(ZeroPageAddressing, Lda):
     identifier_byte = bytes([0xA5])
 
 
-@register
 class LdaZeroPageX(ZeroPageAddressingWithX, Lda):
     identifier_byte = bytes([0xB5])
 
 
-@register
 class LdaAbs(AbsoluteAddressing, Lda):
     identifier_byte = bytes([0xAD])
 
 
-@register
 class LdaAbsY(AbsoluteAddressingYOffset, Lda):
     identifier_byte = bytes([0xB9])
 
 
-@register
 class LdaAbsX(AbsoluteAddressingXOffset, Lda):
     identifier_byte = bytes([0xBD])
 
 
-@register
 class LdaIndirectIndexed(IndirectIndexedAddressing, Lda):
     identifier_byte = bytes([0xB1])
 
 
-@register
+# Ldx
 class LdxImm(ImmediateReadAddressing, Ldx):
     identifier_byte = bytes([0xA2])
 
 
-@register
+# Ldy
 class LdyImm(ImmediateReadAddressing, Ldy):
     identifier_byte = bytes([0xA0])
 
 
-@register
+# Stx
+class StxZeroPage(ZeroPageAddressing, Stx):
+    identifier_byte = bytes([0x86])
+
+
+class StxZeroPageY(ZeroPageAddressingWithY, Stx):
+    identifier_byte = bytes([0x96])
+
+
+class StxAbs(AbsoluteAddressing, Stx):
+    identifier_byte = bytes([0x8E])
+
+
+# Sta
 class StaAbs(AbsoluteAddressing, Sta):
     identifier_byte = bytes([0x8D])
 
 
 # status instructions
-@register
 class Sei(SetBit):
     identifier_byte = bytes([0x78])
     bit = Status.StatusTypes.interrupt
 
 
-@register
 class Cld(ClearBit):
     identifier_byte = bytes([0xD8])
     bit = Status.StatusTypes.decimal

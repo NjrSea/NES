@@ -3,7 +3,7 @@ from ppu import PPU
 from ram import RAM
 from status import Status
 from rom import ROM
-from instruction import LDAImmInstruction, STAAbsInstruction, SEIInstruction, CLDInstruction
+from instructions import LDAImmInstruction, STAAbsInstruction, SEIInstruction, CLDInstruction
 from mock import MagicMock
 import pytest
 

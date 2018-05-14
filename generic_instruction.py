@@ -2,20 +2,9 @@ from typing import Optional
 
 import cpu
 
-instructions = {}
-
-
-def register(cls):
-    instructions[cls.identifier_byte] = cls
-
 
 class Instruction:
     identifier_byte = None
-
-    @classmethod
-    def __str__(cls):
-        return '{}, Identifier byte: {}'.format(cls.__class__.__name__,
-                                                cls.identifier_byte.hex())
 
     @classmethod
     def apply_side_effects(cls, cpu: 'cpu.CPU'):

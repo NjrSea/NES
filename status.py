@@ -1,3 +1,5 @@
+import math
+from collections import OrderedDict
 from enum import Enum
 
 
@@ -30,14 +32,19 @@ class Status:
         negative = 7
 
     def __init__(self):
-        self.bits = {
-            Status.StatusTypes.carry: False,
-            Status.StatusTypes.zero: False,
-            Status.StatusTypes.interrupt: True,
-            Status.StatusTypes.decimal: False,
-            Status.StatusTypes.unused1: True,
-            Status.StatusTypes.unused2: True,
-            Status.StatusTypes.overflow: False,
-            Status.StatusTypes.negative: False,
-        }
+        self.bits = OrderedDict([
+            (Status.StatusTypes.carry, False),
+            (Status.StatusTypes.zero, False),
+            (Status.StatusTypes.interrupt, True),
+            (Status.StatusTypes.decimal, False),
+            (Status.StatusTypes.unused1, False),
+            (Status.StatusTypes.unused2, True),
+            (Status.StatusTypes.overflow, False),
+            (Status.StatusTypes.negative, False),
+        ])
 
+    def to_int(self):
+        value = 0
+        for i, bit in enumerate(self.bits.values()):
+            value += int(bit) * math.pow(2, i)
+        return int(value)
