@@ -14,10 +14,10 @@ class Jsr(Jmp):
     @classmethod
     def write(cls, cpu: 'cpu.CPU', memory_address, value):
         # store the pc reg on the stack
-        memory_owner = cpu.get_memory_owner(cpu.sp_reg)
-        memory_owner.set(cpu.sp_reg, cpu.pc_reg)
+        cpu.set_memory(cpu.sp_reg, cpu.pc_reg, num_bytes=2)
 
-        cpu.sp_reg -= 2
+        # increases the size of the stack
+        cpu.increase_stack_size(2)
 
         super().write(cpu, memory_address, value)
 

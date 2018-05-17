@@ -1,7 +1,7 @@
 from addressing import ImmediateReadAddressing, AbsoluteAddressing, IndexedIndirectAddressing, ZeroPageAddressing, \
     ZeroPageAddressingWithX, ZeroPageAddressingWithY, AbsoluteAddressingYOffset, AbsoluteAddressingXOffset, \
-    IndirectIndexedAddressing
-from base_instructions import Jmp, Jsr, Lda, Ldx, Ldy, Sta, Stx, SetBit, ClearBit
+    IndirectIndexedAddressing, ImplicitAddressing
+from base_instructions import Jmp, Jsr, Nop, Lda, Ldx, Ldy, Sta, Stx, SetBit, ClearBit
 from status import Status
 
 
@@ -14,6 +14,10 @@ class JmpAbs(AbsoluteAddressing, Jmp):
 class JsrAbs(AbsoluteAddressing, Jsr):
     identifier_byte = bytes([0x20])
 
+
+# Nop
+class NopImp(ImplicitAddressing, Nop):
+    identifier_byte = bytes([0xEA])
 
 # Lda
 class LdaImm(ImmediateReadAddressing, Lda):

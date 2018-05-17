@@ -1,6 +1,8 @@
 from typing import List
 from abc import abstractmethod, ABC, abstractproperty
 
+from helpers import short_to_byte
+
 
 class MemoryOwnerMixin(ABC):
     @abstractproperty
@@ -33,6 +35,10 @@ class MemoryOwnerMixin(ABC):
         """
         gets int at given position
         """
-        for i in range(size):
-            self.get_memory()[position - self.memory_start_location - i] = value
+        if size == 1:
+            self.get_memory()[position - self.memory_start_location] = value
+        if size == 2:
+            upper, lower = short_to_byte(value)
+            self.get_memory()[position - self.memory_start_location] = upper
+            self.get_memory()[position - self.memory_start_location - 1] = lower
 

@@ -60,7 +60,7 @@ def test_sta_abs(cpu):
     instruction.execute(cpu, get_data_bytes(instruction_bytes))
     # 0x00 0x20 -> $2000 -> 8192
     memory_location = 8192
-    owner = cpu.get_memory_owner(memory_location)
+    owner = cpu._get_memory_owner(memory_location)
     value_at_memory_location = owner.get(memory_location)
     assert value_at_memory_location == value_to_store
 
