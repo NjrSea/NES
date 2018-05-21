@@ -2,7 +2,7 @@ from typing import List, Optional
 
 
 """
-http://nesdev.com/6502.txt
+  http://nesdev.com/6502.txt
 
   ADDRESSING MODES
 
@@ -12,7 +12,7 @@ http://nesdev.com/6502.txt
   modes, as described below.
 
   1) Immediate
-  In this mode the operand's value is given in the instruction itself. In
+  In this mode the operand's value is given in the instructions itself. In
   assembly language this is indicated by "#" before the operand.
   eg.  LDA #$0A - means "load the accumulator with the hex value 0A"
   In machine code different modes are indicated by different codes. So LDA
@@ -28,19 +28,19 @@ http://nesdev.com/6502.txt
   fills the 00 high byte.
   eg.  LDA $F4
        $A5 $F4
-  Note the different instruction codes for the different modes.
+  Note the different instructions codes for the different modes.
   Note also that for 2 byte addresses, the low byte is store first, eg.
   LDA $31F6 is stored as three bytes in memory, $AD $F6 $31.
   Zero-page absolute is usually just called zero-page.
 
   4) Implied
   No operand addresses are required for this mode. They are implied by the
-  instruction.
+  instructions.
   eg.  TAX - (transfer accumulator contents to X-register)
        $AA
 
   5) Accumulator
-  In this mode the instruction operates on data in the accumulator, so no
+  In this mode the instructions operates on data in the accumulator, so no
   operands are needed.
   eg.  LSR - logical bit shift right
        $4A
@@ -60,14 +60,14 @@ http://nesdev.com/6502.txt
        $B5 $20
 
   8) Indirect
-  This mode applies only to the JMP instruction - JuMP to new location. It is
+  This mode applies only to the JMP instructions - JuMP to new location. It is
   indicated by parenthesis around the operand. The operand is the address of
   the bytes whose value is the new location.
   eg.  JMP ($215F)
   Assume the following -        byte      value
                                 $215F     $76
                                 $2160     $30
-  This instruction takes the value of bytes $215F, $2160 and uses that as the
+  This instructions takes the value of bytes $215F, $2160 and uses that as the
   address to jump to - i.e. $3076 (remember that addresses are stored with
   low byte first).
 
@@ -83,7 +83,7 @@ http://nesdev.com/6502.txt
                                 $0044     $24
                                 $2415     $6E
 
-  Then the instruction is executed by:
+  Then the instructions is executed by:
   (i)   adding $3E and $05 = $0043
   (ii)  getting address contained in bytes $0043, $0044 = $2415
   (iii) loading contents of $2415 - i.e. $6E - into accumulator
@@ -98,16 +98,16 @@ http://nesdev.com/6502.txt
   In this mode the contents of a zero-page address (and the following byte)
   give the indirect addressm which is added to the contents of the Y-register
   to yield the actual address of the operand. Again, inassembly language,
-  the instruction is indicated by parenthesis.
+  the instructions is indicated by parenthesis.
   eg.  LDA ($4C), Y
-  Note that the parenthesis are only around the 2nd byte of the instruction
+  Note that the parenthesis are only around the 2nd byte of the instructions
   since it is the part that does the indirection.
   Assume the following -        byte       value
                                 $004C      $00
                                 $004D      $21
                                 Y-reg.     $05
                                 $2105      $6D
-  Then the instruction above executes by:
+  Then the instructions above executes by:
   (i)   getting the address in bytes $4C, $4D = $2100
   (ii)  adding the contents of the Y-register = $2105
   (111) loading the contents of the byte $2105 - i.e. $6D into the
@@ -127,16 +127,16 @@ http://nesdev.com/6502.txt
   Instruction example:
     BEQ $A7
     $F0 $A7
-  This instruction will check the zero status bit. If it is set, 39 decimal
+  This instructions will check the zero status bit. If it is set, 39 decimal
   will be subtracted from the program counter and execution continues from
   that address. If the zero status bit is not set, execution continues from
-  the following instruction.
-  Notes:  a) The program counter points to the start of the instruction
-  after the branch instruction before the branch displacement is added.
+  the following instructions.
+  Notes:  a) The program counter points to the start of the instructions
+  after the branch instructions before the branch displacement is added.
   Remember to take this into account when calculating displacements.
           b) Branch-on-condition instructions work by checking the relevant
   status bits in the status register. Make sure that they have been set or
-  unset as you want them. This is often done using a CMP instruction.
+  unset as you want them. This is often done using a CMP instructions.
           c) If you find you need to branch further than 127 bytes, use the
   opposite branch-on-condition and a JMP.
 """
@@ -164,7 +164,7 @@ class ImplicitAddressing(Addressing):
 
 class ImmediateReadAddressing(Addressing):
     """
-    takes a value from the instruction data
+    takes a value from the instructions data
     example: STA #7
     example: 8D  07
     """
@@ -250,10 +250,10 @@ class ZeroPageAddressingWithY(YRegOffset, ZeroPageAddressing):
 
 
 class RelativeAddressing(Addressing):
-    # TODO: Signed?
     """
     offset from current PC
     """
+    data_length = 1
 
     @classmethod
     def get_address(cls, cpu, data_bytes: bytes) -> Optional[int]:
@@ -261,7 +261,7 @@ class RelativeAddressing(Addressing):
         # get the program counter
         current_address = cpu.pc_reg
 
-        # offset by value in instruction
+        # offset by value in instructions
 
         return current_address + int.from_bytes(data_bytes, byteorder='little')
 
@@ -292,7 +292,11 @@ class IndexedIndirectAddressing(IndirectBase, ZeroPageAddressingWithX):
     """
 
 
-class IndirectIndexedAddressing(YRegOffset, IndirectBase, ZeroPageAddressing):
+class IndirectIndexedAddressing(IndirectBase, ZeroPageAddressing):
     """
     adds the y reg after indirection
     """
+    @classmethod
+    def get_address(cls, cpu, data_bytes: bytes):
+        return super().get_address(cpu, data_bytes) + cpu.y_reg
+

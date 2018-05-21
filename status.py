@@ -1,6 +1,9 @@
 import math
 from collections import OrderedDict
-from enum import Enum
+from enum import IntEnum
+
+import instructions.generic_instruction as ins
+import cpu as c
 
 
 class Status:
@@ -21,7 +24,8 @@ class Status:
     |            or D6 from last BIT
     +--------- Negative: Set to bit 7 of the last operation
     """
-    class StatusTypes(Enum):
+
+    class StatusTypes(IntEnum):
         carry = 0
         zero = 1
         interrupt = 2
@@ -43,8 +47,19 @@ class Status:
             (Status.StatusTypes.negative, False),
         ])
 
+    def update(self, instruction: 'ins.Instruction', value: int):
+         if instruction.sets_zero_bit:
+            self.bits[Status.StatusTypes.zero] = value == 0
+
+
     def to_int(self):
         value = 0
         for i, bit in enumerate(self.bits.values()):
             value += int(bit) * math.pow(2, i)
         return int(value)
+
+    def status_of_flag(self, flag: StatusTypes) -> bool:
+        return self.bits[flag]
+
+    def set_status_of_flag(self, flag: StatusTypes, value: bool):
+        self.bits[flag] = value

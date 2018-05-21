@@ -1,9 +1,7 @@
 from cpu import CPU
 from ppu import PPU
 from ram import RAM
-from status import Status
-from rom import ROM
-from instructions import LDAImmInstruction, STAAbsInstruction, SEIInstruction, CLDInstruction
+from instructions.instructions import LDAImmInstruction, STAAbsInstruction, SEIInstruction, CLDInstruction
 from mock import MagicMock
 import pytest
 

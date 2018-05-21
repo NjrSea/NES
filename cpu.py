@@ -1,19 +1,25 @@
-import  instructions as instructions_file
-from generic_instruction import Instruction
+from instructions.generic_instruction import Instruction
 from memory_owner import MemoryOwnerMixin
-from ram import RAM
 from ppu import PPU
+from ram import RAM
 from rom import ROM
 from status import Status
+
+
+import  instructions.instructions as i_file
+import  instructions.jump_instructions as j_file
+import  instructions.load_instructions as l_file
+import  instructions.branch_instructions as b_file
+import  instructions.store_instructions as s_file
 
 
 class CPU:
     def __init__(self, ram: RAM, ppu: PPU):
         # status registers: store a single byte
-        self.status_reg = None   # type: Status
+        self.status_reg = None  # type: Status
 
         # counter registers: store a single byte
-        self.pc_reg = None  # program counter
+        self.pc_reg = None  # program counter 2bytes
         self.sp_reg = None  # stack pointer
 
         # data registers: store a single byte
@@ -37,6 +43,8 @@ class CPU:
         instructions_list = self._find_instructions(Instruction)
         self.instructions = {}
         for instruction in instructions_list:
+            if instruction in self.instructions:
+                raise Exception('Duplicate instruction identifier bytes')
             self.instructions[instruction.identifier_byte] = instruction
 
     def start_up(self):
@@ -49,7 +57,7 @@ class CPU:
         $4017: 0 (sound chanel disabled)
         $4015: 0 (frame IRQ disabled)
         $4000-$400F: 0 (sound registers) """
-        self.pc_reg = 0
+        self.pc_reg = 0  # 2 bytes
         self.status_reg = Status()
         self.sp_reg = 0xFD
 
@@ -77,7 +85,7 @@ class CPU:
 
         raise Exception('Cannot find memory owner')
 
-    def set_memory(self, location: int, value: int, num_bytes: int=2):
+    def set_memory(self, location: int, value: int, num_bytes: int = 2):
         """
         sets the memory at a location to a value
         """
@@ -124,7 +132,7 @@ class CPU:
             # print out diagnostic information
             # example: C000  4C F5 C5  JMP $C5F5                A:00 X:00 Y:00 P:24 SP:FD CYC:0
             print('{}, {}, {}, A:{}, X:{}, Y:{}, P:{}, SP:{}'.format(hex(self.pc_reg),
-                                                                     (identifier_byte+data_bytes).hex(),
+                                                                     (identifier_byte + data_bytes).hex(),
                                                                      instruction.__name__,
                                                                      self.a_reg,
                                                                      self.x_reg,
@@ -134,8 +142,7 @@ class CPU:
 
             self.pc_reg += instruction.get_instruction_length()
 
-            # we have a valid instruction
-            instruction.execute(self, data_bytes)
+            # we have a valid instructions
+            value = instruction.execute(self, data_bytes)
 
-
-
+            self.status_reg.update(instruction, value)

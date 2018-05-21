@@ -5,6 +5,13 @@ import cpu
 
 class Instruction:
     identifier_byte = None
+    bit = None  # type: Status.StatusTypes
+    sets_zero_bit: False
+    sets_negative_bit: False
+    sets_decimal_bit: False
+    sets_overflow_bit: False
+    sets_interrupt_bit: False
+    sets_carry_bit: False
 
     @classmethod
     def apply_side_effects(cls, cpu: 'cpu.CPU'):
@@ -31,6 +38,8 @@ class Instruction:
         cls.write(cpu, memory_address, value)
 
         cls.apply_side_effects(cpu)
+
+        return value
 
 
 class WritesToMemory(object):
