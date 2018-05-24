@@ -1,6 +1,6 @@
-from instructions.base_instructions import BranchSet, BranchClear, Bit
+from instructions.base_instructions import BranchSet, BranchClear
 from status import Status
-from addressing import ZeroPageAddressing, AbsoluteAddressing
+from addressing import AbsoluteAddressing
 
 
 class Bcs(BranchSet):
@@ -44,20 +44,6 @@ class Bvc(BranchClear):
     """
     identifier_byte = bytes([0x50])
     bit = Status.StatusTypes.overflow
-
-
-class BitZeroPage(ZeroPageAddressing, Bit):
-    """
-    Test Bits in Memory with Accumulator
-    """
-    identifier_byte = bytes([0x24])
-
-
-class BitAbs(AbsoluteAddressing, Bit):
-    """
-    Test Bits in Memory with Accumulator
-    """
-    identifier_byte = bytes([0x2C])
 
 
 class Bcc(BranchClear):

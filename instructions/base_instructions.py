@@ -1,7 +1,8 @@
 from typing import Optional
 
 from addressing import ImplicitAddressing, RelativeAddressing
-from instructions.generic_instruction import Instruction, WritesToMemory
+from instructions.generic_instruction import Instruction, WritesToMemory, ReadsFromMemory
+from status import Status
 
 
 class Jmp(Instruction):
@@ -30,6 +31,23 @@ class Jsr(Jmp):
         super().write(cpu, memory_address, value)
 
 
+class Rts(Jmp):
+    """
+    N Z C I D V
+    - - - - - -
+    """
+    @classmethod
+    def write(cls, cpu: 'cpu.CPU', memory_address, value):
+        # decrease the size of the stack
+        cpu.increase_stack_size(2)
+
+        # grab the pc reg on the stack
+        old_pc_reg = cpu.get_memory(cpu.sp_reg, num_bytes=2)
+
+        # jump to the memory location
+        super().write(cpu, old_pc_reg, value)
+
+
 class Nop(Instruction):
     """
     N Z C I D V
@@ -38,7 +56,7 @@ class Nop(Instruction):
     pass
 
 
-class Ld(Instruction):
+class Ld(ReadsFromMemory, Instruction):
     """
     N Z C I D V
     + + - - - -
@@ -141,11 +159,17 @@ class BranchClear(RelativeAddressing, Jmp):
             super().write(cpu, memory_address, value)
 
 
-class Bit(Instruction):
+class Bit(ReadsFromMemory, Instruction):
     """
     bits 7 and 6 of operand are transfered to bit 7 and 6 of SR (N,V);
     the zeroflag is set to the result of operand AND accumulator.
+
+    N Z C I D V
+    x + - - - x
     """
+    sets_negative_bit = True
+    sets_overflow_bit = True
+
+    @classmethod
     def write(cls, cpu: 'cpu.CPU', memory_address, value):
-        # TODO:
-        super().write(cpu, memory_address, value)
+        cpu.status_reg.set_status_of_flag(Status.StatusTypes.zero, not bool(value & cpu.a_reg))

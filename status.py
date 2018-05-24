@@ -2,8 +2,7 @@ import math
 from collections import OrderedDict
 from enum import IntEnum
 
-import instructions.generic_instruction as ins
-import cpu as c
+from instructions.generic_instruction import Instruction
 
 
 class Status:
@@ -47,10 +46,13 @@ class Status:
             (Status.StatusTypes.negative, False),
         ])
 
-    def update(self, instruction: 'ins.Instruction', value: int):
-         if instruction.sets_zero_bit:
+    def update(self, instruction: Instruction, value: int):
+        if instruction.sets_zero_bit:
             self.bits[Status.StatusTypes.zero] = value == 0
-
+        if instruction.sets_negative_bit:
+            self.bits[Status.StatusTypes.negative] = bool(value & 0b10000000)
+        if instruction.sets_overflow_bit:
+            self.bits[Status.StatusTypes.overflow] = bool(value & 0b01000000)
 
     def to_int(self):
         value = 0

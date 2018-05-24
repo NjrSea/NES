@@ -6,12 +6,14 @@ import cpu
 class Instruction:
     identifier_byte = None
     bit = None  # type: Status.StatusTypes
-    sets_zero_bit: False
-    sets_negative_bit: False
-    sets_decimal_bit: False
-    sets_overflow_bit: False
-    sets_interrupt_bit: False
-    sets_carry_bit: False
+    sets_zero_bit = False
+    sets_negative_bit = False
+    sets_decimal_bit = False
+    sets_overflow_bit = False
+    sets_interrupt_bit = False
+    sets_carry_bit = False
+
+    data_length = 0
 
     @classmethod
     def apply_side_effects(cls, cpu: 'cpu.CPU'):
@@ -42,8 +44,15 @@ class Instruction:
         return value
 
 
-class WritesToMemory(object):
+class WritesToMemory:
     @classmethod
     def write(cls, cpu: 'cpu.CPU', memory_address, value):
         memory_owner = cpu._get_memory_owner(memory_address)
         memory_owner.set(memory_address, value)
+
+
+class ReadsFromMemory:
+    @classmethod
+    def get_data(cls, cpu: 'cpu.CPU', memory_address: int, data_bytes) -> Optional[int]:
+        return cpu.get_memory(memory_address)
+

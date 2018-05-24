@@ -6,11 +6,12 @@ from rom import ROM
 from status import Status
 
 
-import  instructions.instructions as i_file
-import  instructions.jump_instructions as j_file
-import  instructions.load_instructions as l_file
-import  instructions.branch_instructions as b_file
-import  instructions.store_instructions as s_file
+import instructions.instructions as i_file
+import instructions.jump_instructions as j_file
+import instructions.load_instructions as l_file
+import instructions.branch_instructions as b_file
+import instructions.store_instructions as s_file
+import instructions.bit_instructions as bit_file
 
 
 class CPU:
@@ -38,6 +39,9 @@ class CPU:
             self.ram,
             self.ppu,
         ]
+
+        self.instruction = None
+        self.data_bytes = None
 
         # create the instructions that cpu can interpret
         instructions_list = self._find_instructions(Instruction)
@@ -68,12 +72,12 @@ class CPU:
 
         # TODO memory sets
 
-    def get_memory(self, location: int) -> int:
+    def get_memory(self, location: int, num_bytes: int = 1) -> int:
         """
         return a byte from a given memory location
         """
         memory_owner = self._get_memory_owner(location)
-        return memory_owner.get(location)
+        return memory_owner.get(location, num_bytes)
 
     def _get_memory_owner(self, location: int) -> MemoryOwnerMixin:
         """
@@ -105,7 +109,13 @@ class CPU:
         """
         self.sp_reg -= size
 
-    def run_rom(self, rom: ROM):
+    def decrease_stack_size(self, size: int):
+        """
+        decrease stack size by decreasing the stack pointer
+        """
+        self.sp_reg += size
+
+    def load_rom(self, rom: ROM):
         # unload old rom
         if self.rom is not None:
             self.memory_owners.remove(self.rom)
@@ -117,32 +127,32 @@ class CPU:
         # load the rom program instructions into memory
         self.memory_owners.append(self.rom)
 
-        # run program
-        self.running = True
-        while self.running:
-            identifier_byte = self._get_memory_owner(self.pc_reg).get(self.pc_reg)
-            instruction = self.instructions.get(identifier_byte, None)
+    def identify(self):
+        identifier_byte = self._get_memory_owner(self.pc_reg).get(self.pc_reg)
+        self.instruction = self.instructions.get(identifier_byte, None)
 
-            if instruction is None:
-                raise Exception("Instruction not found: {}".format(identifier_byte.hex()))
+        if self.instruction is None:
+            raise Exception("Instruction not found: {}".format(identifier_byte.hex()))
 
-            # get the data bytes
-            data_bytes = self.rom.get(self.pc_reg + 1, instruction.data_length)
+        # get the data bytes
+        self.data_bytes = self.rom.get(self.pc_reg + 1, self.instruction.data_length)
 
-            # print out diagnostic information
-            # example: C000  4C F5 C5  JMP $C5F5                A:00 X:00 Y:00 P:24 SP:FD CYC:0
-            print('{}, {}, {}, A:{}, X:{}, Y:{}, P:{}, SP:{}'.format(hex(self.pc_reg),
-                                                                     (identifier_byte + data_bytes).hex(),
-                                                                     instruction.__name__,
-                                                                     self.a_reg,
-                                                                     self.x_reg,
-                                                                     self.y_reg,
-                                                                     hex(self.status_reg.to_int()),
-                                                                     hex(self.sp_reg)))
+        # print out diagnostic information
+        # example: C000  4C F5 C5  JMP $C5F5                A:00 X:00 Y:00 P:24 SP:FD CYC:0
+        print('{}, {}, {}, A:{}, X:{}, Y:{}, P:{}, SP:{}'.format(hex(self.pc_reg),
+                                                                 (identifier_byte + self.data_bytes).hex(),
+                                                                 self.instruction.__name__,
+                                                                 self.a_reg,
+                                                                 self.x_reg,
+                                                                 self.y_reg,
+                                                                 hex(self.status_reg.to_int()),
+                                                                 hex(self.sp_reg)))
 
-            self.pc_reg += instruction.get_instruction_length()
+    def execute(self):
+        self.pc_reg += self.instruction.get_instruction_length()
 
-            # we have a valid instructions
-            value = instruction.execute(self, data_bytes)
+        # we have a valid instructions
+        value = self.instruction.execute(self, self.data_bytes)
 
-            self.status_reg.update(instruction, value)
+        self.status_reg.update(self.instruction, value)
+
