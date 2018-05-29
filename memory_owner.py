@@ -38,13 +38,13 @@ class MemoryOwnerMixin(ABC):
         else:
             raise Exception('Unknown number size')
 
-    def set(self, position: int, value: int, size: int = 1):
+    def set(self, position: int, value: int, size: int=1):
         """
         gets int at given position
         """
         if size == 1:
             self.get_memory()[position - self.memory_start_location] = value
-        if size == 2:
+        elif size == 2:
             upper, lower = short_to_byte(value)
             self.get_memory()[position - self.memory_start_location] = upper
             self.get_memory()[position - self.memory_start_location - 1] = lower

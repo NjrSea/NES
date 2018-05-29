@@ -48,7 +48,7 @@ class WritesToMemory:
     @classmethod
     def write(cls, cpu: 'cpu.CPU', memory_address, value):
         memory_owner = cpu._get_memory_owner(memory_address)
-        memory_owner.set(memory_address, value)
+        memory_owner.set(position=memory_address, value=value)
 
 
 class ReadsFromMemory:

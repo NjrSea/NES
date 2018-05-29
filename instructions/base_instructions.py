@@ -39,7 +39,7 @@ class Rts(Jmp):
     @classmethod
     def write(cls, cpu: 'cpu.CPU', memory_address, value):
         # decrease the size of the stack
-        cpu.increase_stack_size(2)
+        cpu.decrease_stack_size(2)
 
         # grab the pc reg on the stack
         old_pc_reg = cpu.get_memory(cpu.sp_reg, num_bytes=2)
@@ -125,6 +125,50 @@ class Sty(WritesToMemory, Instruction):
         return cpu.y_reg
 
 
+class Php(ImplicitAddressing, Instruction):
+    """
+    N Z C I D V
+    - - - - - -
+
+    Push Processor Status on Stack
+    """
+    identifier_byte = bytes([0x08])
+
+    @classmethod
+    def write(cls, cpu: 'cpu.CPU', memory_address, value):
+        cpu.set_memory(cpu.sp_reg, cpu.status_reg.to_int())
+        cpu.increase_stack_size(1)
+
+
+class Pla(ImplicitAddressing, Instruction):
+    """
+    N Z C I D V
+    + + - - - -
+
+    Pull Accumulator from Stack
+    """
+    identifier_byte = bytes([0x68])
+    sets_negative_bit = True
+    sets_zero_bit = True
+
+    @classmethod
+    def write(cls, cpu: 'cpu.CPU', memory_address, value):
+        cpu.a_reg = cpu.get_memory(cpu.sp_reg)
+        cpu.decrease_stack_size(1)
+
+
+class Plp(ImplicitAddressing, Instruction):
+    """
+    N Z C I D V
+    from stack
+    """
+    identifier_byte = bytes([0x28])
+
+    @classmethod
+    def write(cls, cpu: 'cpu.CPU', memory_address, value):
+        cpu.status_reg = cpu.get_memory(cpu.sp_reg)
+
+
 class SetBit(ImplicitAddressing, Instruction):
     """
     set a bit to be True
@@ -173,3 +217,4 @@ class Bit(ReadsFromMemory, Instruction):
     @classmethod
     def write(cls, cpu: 'cpu.CPU', memory_address, value):
         cpu.status_reg.set_status_of_flag(Status.StatusTypes.zero, not bool(value & cpu.a_reg))
+
