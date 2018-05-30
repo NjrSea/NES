@@ -37,7 +37,10 @@ class Instruction:
 
         value = cls.get_data(cpu, memory_address, data_bytes)
 
-        cls.write(cpu, memory_address, value)
+        updated_value = cls.write(cpu, memory_address, value)
+
+        if updated_value is not None:
+            value = updated_value
 
         cls.apply_side_effects(cpu)
 

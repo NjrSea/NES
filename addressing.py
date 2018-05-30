@@ -285,14 +285,13 @@ class IndirectAddressing(IndirectBase, AbsoluteAddressing):
     """
 
 
-# TODO: bug with get_offset being reused
-class IndexedIndirectAddressing(IndirectBase, ZeroPageAddressingWithX):
+class IndirectAddressingWithX(IndirectBase, ZeroPageAddressingWithX):
     """
     adds the x reg before indirection
     """
 
 
-class IndirectIndexedAddressing(IndirectBase, ZeroPageAddressing):
+class IndirectAddressingWithY(IndirectBase, ZeroPageAddressing):
     """
     adds the y reg after indirection
     """

@@ -12,6 +12,7 @@ import instructions.load_instructions as l_file
 import instructions.branch_instructions as b_file
 import instructions.store_instructions as s_file
 import instructions.bit_instructions as bit_file
+import instructions.stack_instructions as stack_file
 
 
 class CPU:

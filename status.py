@@ -60,6 +60,10 @@ class Status:
             value += int(bit) * math.pow(2, i)
         return int(value)
 
+    def from_int(self, value: int):
+        for i, key in enumerate(self.bits.keys()):
+            self.bits[key] = value & (1 << i)
+
     def status_of_flag(self, flag: StatusTypes) -> bool:
         return self.bits[flag]
 

@@ -125,48 +125,38 @@ class Sty(WritesToMemory, Instruction):
         return cpu.y_reg
 
 
-class Php(ImplicitAddressing, Instruction):
+class StackPush(Instruction):
     """
+    push data reg onto stack
     N Z C I D V
     - - - - - -
-
-    Push Processor Status on Stack
     """
-    identifier_byte = bytes([0x08])
-
     @classmethod
     def write(cls, cpu: 'cpu.CPU', memory_address, value):
-        cpu.set_memory(cpu.sp_reg, cpu.status_reg.to_int())
+        data_to_push = cls.data_to_push(cpu)
+
+        # write the status to the stack
+        cpu.set_memory(cpu.sp_reg, data_to_push)
+
         cpu.increase_stack_size(1)
 
 
-class Pla(ImplicitAddressing, Instruction):
+class StackPull(Instruction):
     """
+    pull data reg onto stack
     N Z C I D V
-    + + - - - -
-
-    Pull Accumulator from Stack
+    - - - - - -
     """
-    identifier_byte = bytes([0x68])
-    sets_negative_bit = True
-    sets_zero_bit = True
 
     @classmethod
     def write(cls, cpu: 'cpu.CPU', memory_address, value):
-        cpu.a_reg = cpu.get_memory(cpu.sp_reg)
         cpu.decrease_stack_size(1)
 
+        # get the data from the stack
+        pulled_data = cpu.get_memory(cpu.sp_reg)
 
-class Plp(ImplicitAddressing, Instruction):
-    """
-    N Z C I D V
-    from stack
-    """
-    identifier_byte = bytes([0x28])
-
-    @classmethod
-    def write(cls, cpu: 'cpu.CPU', memory_address, value):
-        cpu.status_reg = cpu.get_memory(cpu.sp_reg)
+        # write the pulled data
+        cls.write_pulled_data(cpu, pulled_data)
 
 
 class SetBit(ImplicitAddressing, Instruction):
@@ -187,6 +177,20 @@ class ClearBit(ImplicitAddressing, Instruction):
     def apply_side_effects(cls, cpu: 'cpu.CPU'):
         if cls.bit is not None:
             cpu.status_reg.set_status_of_flag(cls.bit, False)
+
+class And(Instruction):
+    """
+    bitwise and with accumulator and store result
+    N Z C I D V
+    + + - - - -
+    """
+    sets_negative_bit = True
+    sets_zero_bit = True
+
+    @classmethod
+    def write(cls, cpu: 'cpu.CPU', memory_address, value):
+        cpu.a_reg &= value
+        return cpu.a_reg
 
 
 class BranchSet(RelativeAddressing, Jmp):
@@ -217,4 +221,5 @@ class Bit(ReadsFromMemory, Instruction):
     @classmethod
     def write(cls, cpu: 'cpu.CPU', memory_address, value):
         cpu.status_reg.set_status_of_flag(Status.StatusTypes.zero, not bool(value & cpu.a_reg))
+
 
