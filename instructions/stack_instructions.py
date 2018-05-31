@@ -9,7 +9,7 @@ class Php(ImplicitAddressing, StackPush):
 
     @classmethod
     def data_to_push(cls, cpu):
-        return cpu.status_reg.to_int()
+        return cpu.status_reg.to_int() | 0b11000
 
 
 class Pha(ImplicitAddressing, StackPush):
@@ -21,6 +21,9 @@ class Pha(ImplicitAddressing, StackPush):
 
 
 class Txs(ImplicitAddressing, StackPush):
+    sets_negative_bit = True
+    sets_zero_bit = True
+
     identifier_byte = bytes([0x9A])
 
     @classmethod
@@ -38,6 +41,9 @@ class Plp(ImplicitAddressing, StackPull):
 
 
 class Pla(ImplicitAddressing, StackPull):
+    sets_negative_bit = True
+    sets_zero_bit = True
+
     identifier_byte = bytes([0x68])
 
     @classmethod
