@@ -13,6 +13,10 @@ class Php(ImplicitAddressing, StackPush):
 
 
 class Pha(ImplicitAddressing, StackPush):
+    """
+    N Z C I D V
+    - - - - - -
+    """
     identifier_byte = bytes([0x48])
 
     @classmethod
@@ -49,9 +53,13 @@ class Pla(ImplicitAddressing, StackPull):
     @classmethod
     def write_pulled_data(cls, cpu, pulled_data):
         cpu.a_reg = pulled_data
+        return cpu.a_reg
 
 
 class Tsx(ImplicitAddressing, StackPull):
+    sets_negative_bit = True
+    sets_zero_bit = True
+
     identifier_byte = bytes([0xBA])
 
     @classmethod

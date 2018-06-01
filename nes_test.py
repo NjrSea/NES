@@ -2,6 +2,7 @@ from typing import List
 import re
 from cpu import CPU
 
+
 class NesTestLog:
     def __init__(self, lines: List[str]):
         self.lines = []  # type: List[NesTestLine]

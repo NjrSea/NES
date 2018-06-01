@@ -48,7 +48,7 @@ class Status:
 
     def update(self, instruction: Instruction, value: int):
         if instruction.sets_zero_bit:
-            self.bits[Status.StatusTypes.zero] = value == 0
+            self.bits[Status.StatusTypes.zero] = not bool(value)
         if instruction.sets_negative_bit:
             self.bits[Status.StatusTypes.negative] = bool(value & 0b10000000)
         if instruction.sets_overflow_bit:
@@ -62,7 +62,7 @@ class Status:
 
     def from_int(self, value: int):
         for i, key in enumerate(self.bits.keys()):
-            self.bits[key] = value & (1 << i)
+            self.bits[key] = bool(value & (1 << i))
 
     def status_of_flag(self, flag: StatusTypes) -> bool:
         return self.bits[flag]

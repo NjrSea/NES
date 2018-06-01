@@ -136,9 +136,11 @@ class StackPush(Instruction):
         data_to_push = cls.data_to_push(cpu)
 
         # write the status to the stack
-        cpu.set_memory(cpu.sp_reg, data_to_push)
+        cpu.set_memory(cpu.sp_reg, data_to_push, 1)
 
         cpu.increase_stack_size(1)
+
+        return data_to_push
 
 
 class StackPull(Instruction):
@@ -156,7 +158,7 @@ class StackPull(Instruction):
         pulled_data = cpu.get_memory(cpu.sp_reg)
 
         # write the pulled data
-        cls.write_pulled_data(cpu, pulled_data)
+        return cls.write_pulled_data(cpu, pulled_data)
 
 
 class SetBit(ImplicitAddressing, Instruction):
@@ -177,6 +179,7 @@ class ClearBit(ImplicitAddressing, Instruction):
     def apply_side_effects(cls, cpu: 'cpu.CPU'):
         if cls.bit is not None:
             cpu.status_reg.set_status_of_flag(cls.bit, False)
+
 
 class And(Instruction):
     """

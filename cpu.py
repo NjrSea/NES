@@ -152,7 +152,6 @@ class CPU:
     def execute(self):
         self.pc_reg += self.instruction.get_instruction_length()
 
-        # we have a valid instructions
         value = self.instruction.execute(self, self.data_bytes)
 
         self.status_reg.update(self.instruction, value)
