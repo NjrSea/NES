@@ -161,6 +161,35 @@ class StackPull(Instruction):
         return cls.write_pulled_data(cpu, pulled_data)
 
 
+class And(Instruction):
+    """
+    bitwise and with accumulator and store result
+    N Z C I D V
+    + + - - - -
+    """
+    sets_negative_bit = True
+    sets_zero_bit = True
+
+    @classmethod
+    def write(cls, cpu: 'cpu.CPU', memory_address, value):
+        cpu.a_reg &= value
+        return cpu.a_reg
+
+
+class Cmp(Instruction):
+    """
+    N Z C I D V
+    + + - - - -
+    """
+    sets_negative_bit = True
+    sets_zero_bit = True
+    sets_carry_bit = True
+
+    @classmethod
+    def write(cls, cpu: 'cpu.CPU', memory_address, value):
+        return value - cpu.a_reg
+
+
 class SetBit(ImplicitAddressing, Instruction):
     """
     set a bit to be True
@@ -179,21 +208,6 @@ class ClearBit(ImplicitAddressing, Instruction):
     def apply_side_effects(cls, cpu: 'cpu.CPU'):
         if cls.bit is not None:
             cpu.status_reg.set_status_of_flag(cls.bit, False)
-
-
-class And(Instruction):
-    """
-    bitwise and with accumulator and store result
-    N Z C I D V
-    + + - - - -
-    """
-    sets_negative_bit = True
-    sets_zero_bit = True
-
-    @classmethod
-    def write(cls, cpu: 'cpu.CPU', memory_address, value):
-        cpu.a_reg &= value
-        return cpu.a_reg
 
 
 class BranchSet(RelativeAddressing, Jmp):
@@ -224,5 +238,4 @@ class Bit(ReadsFromMemory, Instruction):
     @classmethod
     def write(cls, cpu: 'cpu.CPU', memory_address, value):
         cpu.status_reg.set_status_of_flag(Status.StatusTypes.zero, not bool(value & cpu.a_reg))
-
 
