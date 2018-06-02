@@ -9,7 +9,7 @@ class Php(ImplicitAddressing, StackPush):
 
     @classmethod
     def data_to_push(cls, cpu):
-        return cpu.status_reg.to_int() | 0b11000
+        return cpu.status_reg.to_int() | 0b110000
 
 
 class Pha(ImplicitAddressing, StackPush):

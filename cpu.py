@@ -13,6 +13,7 @@ import instructions.branch_instructions as b_file
 import instructions.store_instructions as s_file
 import instructions.bit_instructions as bit_file
 import instructions.stack_instructions as stack_file
+import instructions.arithmetic_instructions as a_file
 
 
 class CPU:
@@ -90,7 +91,7 @@ class CPU:
 
         raise Exception('Cannot find memory owner')
 
-    def set_memory(self, location: int, value: int, num_bytes: int = 2):
+    def set_memory(self, location: int, value: int, num_bytes: int = 1):
         """
         sets the memory at a location to a value
         """
@@ -143,9 +144,9 @@ class CPU:
         print('{}, {}, {}, A:{}, X:{}, Y:{}, P:{}, SP:{}'.format(hex(self.pc_reg),
                                                                  (identifier_byte + self.data_bytes).hex(),
                                                                  self.instruction.__name__,
-                                                                 self.a_reg,
-                                                                 self.x_reg,
-                                                                 self.y_reg,
+                                                                 hex(self.a_reg),
+                                                                 hex(self.x_reg),
+                                                                 hex(self.y_reg),
                                                                  hex(self.status_reg.to_int()),
                                                                  hex(self.sp_reg)))
 
