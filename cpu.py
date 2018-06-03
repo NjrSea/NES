@@ -5,6 +5,7 @@ from ram import RAM
 from rom import ROM
 from status import Status
 
+import numpy as np
 
 import instructions.instructions as i_file
 import instructions.jump_instructions as j_file
@@ -65,12 +66,11 @@ class CPU:
         $4000-$400F: 0 (sound registers) """
         self.pc_reg = 0  # 2 bytes
         self.status_reg = Status()
-        self.sp_reg = 0xFD
+        self.sp_reg = np.uint8(0xFD)
 
-        # TODO change to int?
-        self.x_reg = 0
-        self.y_reg = 0
-        self.a_reg = 0
+        self.x_reg = np.uint8(0)
+        self.y_reg = np.uint8(0)
+        self.a_reg = np.uint8(0)
 
         # TODO memory sets
 

@@ -1,8 +1,10 @@
 import math
 from collections import OrderedDict
 from enum import IntEnum
+from typing import List
 
 from instructions.generic_instruction import Instruction
+import numpy as np
 
 
 class Status:
@@ -48,11 +50,11 @@ class Status:
 
     def update(self, instruction: Instruction, value: int):
         if instruction.sets_zero_bit:
-            self.bits[Status.StatusTypes.zero] = not bool(value)
+            self.bits[Status.StatusTypes.zero] = not bool(np.uint8(value))
         if instruction.sets_negative_bit:
-            self.bits[Status.StatusTypes.negative] = bool(value & 0b10000000)
+            self.bits[Status.StatusTypes.negative] = bool(np.uint8(value) & 0b10000000)
         if instruction.sets_overflow_bit:
-            self.bits[Status.StatusTypes.overflow] = bool(value & 0b01000000)
+            self.bits[Status.StatusTypes.overflow] = bool(np.uint8(value) & 0b01000000)
 
     def to_int(self):
         value = 0
@@ -60,9 +62,11 @@ class Status:
             value += int(bit) * math.pow(2, i)
         return int(value)
 
-    def from_int(self, value: int):
+    def from_int(self, value: int, bits_to_ignore: List[int]):
         for i, key in enumerate(self.bits.keys()):
-            self.bits[key] = bool(value & (1 << i))
+            if i in bits_to_ignore:
+                continue
+            self.bits[key] = bool(np.uint8(value) & (1 << i))
 
     def status_of_flag(self, flag: StatusTypes) -> bool:
         return self.bits[flag]

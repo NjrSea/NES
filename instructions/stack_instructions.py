@@ -37,11 +37,15 @@ class Txs(ImplicitAddressing, StackPush):
 
 # stack pull instructions
 class Plp(ImplicitAddressing, StackPull):
+    """
+    sets the stack
+    ignores bits 4 and 5
+    """
     identifier_byte = bytes([0x28])
 
     @classmethod
     def write_pulled_data(cls, cpu, pulled_data):
-        cpu.status_reg.from_int(pulled_data)
+        cpu.status_reg.from_int(pulled_data, [4, 5])
 
 
 class Pla(ImplicitAddressing, StackPull):

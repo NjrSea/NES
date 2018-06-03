@@ -1,4 +1,5 @@
-from typing import List, Optional
+from typing import Optional
+import numpy as np
 
 
 """
@@ -230,10 +231,8 @@ class ZeroPageAddressing(Addressing):
 
     @classmethod
     def get_address(cls, cpu, data_bytes: bytes) -> Optional[int]:
-        address = int.from_bytes(data_bytes, byteorder='little') + cls.get_offset(cpu)
+        address = np.uint8(int.from_bytes(data_bytes, byteorder='little') + cls.get_offset(cpu))
         # check for overflow
-        if address >= 256:
-            address %= 256
         return address
 
 

@@ -1,6 +1,8 @@
 from addressing import ZeroPageAddressing, AbsoluteAddressing, ImmediateReadAddressing, ZeroPageAddressingWithX,\
-    AbsoluteAddressingXOffset, AbsoluteAddressingYOffset, IndirectAddressingWithX, IndirectAddressingWithY
-from instructions.base_instructions import Bit, And
+    AbsoluteAddressingXOffset, AbsoluteAddressingYOffset, IndirectAddressingWithX, IndirectAddressingWithY, \
+    ImplicitAddressing
+from instructions.base_instructions import Bit, And, RegisterModifier
+import numpy as np
 
 
 class BitZeroPage(ZeroPageAddressing, Bit):
@@ -11,34 +13,74 @@ class BitAbs(AbsoluteAddressing, Bit):
     identifier_byte = bytes([0x2C])
 
 
-# and instructions
-class AndImm(ImmediateReadAddressing, And):
-    identifier_byte = bytes([0x29])
+# register instructions
+class Iny(ImplicitAddressing, RegisterModifier):
+    identifier_byte = bytes([0xC8])
+
+    @classmethod
+    def write(cls, cpu, memory_address, value):
+        cpu.y_reg += np.uint8(1)
+        return cpu.y_reg
 
 
-class AndZpg(ZeroPageAddressing, And):
-    identifier_byte = bytes([0x25])
+class Dey(ImplicitAddressing, RegisterModifier):
+    identifier_byte = bytes([0x88])
+
+    @classmethod
+    def write(cls, cpu, memory_address, value):
+        cpu.y_reg -= np.uint8(1)
+        return cpu.y_reg
 
 
-class AndZpgX(ZeroPageAddressingWithX, And):
-    identifier_byte = bytes([0x35])
+class Inx(ImplicitAddressing, RegisterModifier):
+    identifier_byte = bytes([0xE8])
+
+    @classmethod
+    def write(cls, cpu, memory_address, value):
+        cpu.x_reg += np.uint8(1)
+        return cpu.x_reg
 
 
-class AndAbs(AbsoluteAddressing, And):
-    identifier_byte = bytes([0x2D])
+class Dex(ImplicitAddressing, RegisterModifier):
+    identifier_byte = bytes([0xCA])
+
+    @classmethod
+    def write(cls, cpu, memory_address, value):
+        cpu.x_reg -= np.uint8(1)
+        return cpu.x_reg
 
 
-class AndAbsX(AbsoluteAddressingXOffset, And):
-    identifier_byte = bytes([0x3D])
+class Tax(ImplicitAddressing, RegisterModifier):
+    identifier_byte = bytes([0xAA])
+
+    @classmethod
+    def write(cls, cpu, memory_address, value):
+        cpu.x_reg = cpu.a_reg
+        return cpu.x_reg
 
 
-class AndAbsY(AbsoluteAddressingYOffset, And):
-    identifier_byte = bytes([0x39])
+class Txa(ImplicitAddressing, RegisterModifier):
+    identifier_byte = bytes([0x8A])
+
+    @classmethod
+    def write(cls, cpu, memory_address, value):
+        cpu.a_reg = cpu.x_reg
+        return cpu.a_reg
 
 
-class AndIndX(IndirectAddressingWithX, And):
-    identifier_byte = bytes([0x21])
+class Tay(ImplicitAddressing, RegisterModifier):
+    identifier_byte = bytes([0xA8])
+
+    @classmethod
+    def write(cls, cpu, memory_address, value):
+        cpu.y_reg = cpu.a_reg
+        return cpu.y_reg
 
 
-class AndIndY(IndirectAddressingWithY, And):
-    identifier_byte = bytes([0x31])
+class Tya(ImplicitAddressing, RegisterModifier):
+    identifier_byte = bytes([0x98])
+
+    @classmethod
+    def write(cls, cpu, memory_address, value):
+        cpu.a_reg = cpu.y_reg
+        return cpu.a_reg
