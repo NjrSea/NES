@@ -69,3 +69,4 @@ class Tsx(ImplicitAddressing, StackPull):
     @classmethod
     def write_pulled_data(cls, cpu, pulled_data):
         cpu.x_reg = pulled_data
+        return cpu.x_reg

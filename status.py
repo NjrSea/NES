@@ -53,7 +53,7 @@ class Status:
             self.bits[Status.StatusTypes.zero] = not bool(np.uint8(value))
         if instruction.sets_negative_bit:
             self.bits[Status.StatusTypes.negative] = bool(np.uint8(value) & 0b10000000)
-        if instruction.sets_overflow_bit:
+        if instruction.sets_overflow_bit_from_value:
             self.bits[Status.StatusTypes.overflow] = bool(np.uint8(value) & 0b01000000)
 
     def to_int(self):

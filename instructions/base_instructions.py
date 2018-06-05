@@ -74,7 +74,7 @@ class Lda(Ld):
     """
     @classmethod
     def write(cls, cpu, memory_address, value):
-        cpu.a_reg = np.uint(value)
+        cpu.a_reg = np.uint8(value)
 
 
 class Ldx(Ld):
@@ -219,9 +219,9 @@ class Adc(Instruction):
 
     @classmethod
     def write(cls, cpu, memory_address, value):
-        result = np.uint8(cpu.a_reg + value + int(cpu.status_reg.bits[Status.StatusTypes.carry]))
+        result = cpu.a_reg + value + int(cpu.status_reg.bits[Status.StatusTypes.carry])
         # if value and a_reg have different signs than result, set overflow
-        overflow = bool((np.uint8(cpu.a_reg) ^ result) & (np.uint8(value) ^ result) & 0x80)
+        overflow = bool((np.uint8(cpu.a_reg) ^ np.uint8(result)) & (np.uint8(value) ^ np.uint8(result)) & 0x80)
         cpu.status_reg.bits[Status.StatusTypes.overflow] = overflow
 
         # if greater than 255, carry
@@ -231,7 +231,7 @@ class Adc(Instruction):
         else:
             cpu.status_reg.bits[Status.StatusTypes.carry] = False
 
-        cpu.a_reg = result
+        cpu.a_reg = np.uint8(result)
         return cpu.a_reg
 
 
@@ -260,7 +260,8 @@ class Compare(Instruction):
 
     @classmethod
     def write(cls, cpu, memory_address, value):
-        cpu.status_reg.bits[Status.StatusTypes.carry] = not bool(np.uint8(value) & 256)
+        # TODO: remove np.int()
+        cpu.status_reg.bits[Status.StatusTypes.carry] = not bool(np.int(value) & 256)
         return value
 
 
@@ -337,7 +338,7 @@ class Bit(ReadsFromMemory, Instruction):
     x + - - - x
     """
     sets_negative_bit = True
-    sets_overflow_bit = True
+    sets_overflow_bit_from_value = True
 
     @classmethod
     def write(cls, cpu: 'cpu.CPU', memory_address, value):

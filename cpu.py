@@ -109,13 +109,13 @@ class CPU:
         """
         increase stack size by decreasing the stack pointer
         """
-        self.sp_reg -= size
+        self.sp_reg -= np.uint8(size)
 
     def decrease_stack_size(self, size: int):
         """
         decrease stack size by decreasing the stack pointer
         """
-        self.sp_reg += size
+        self.sp_reg += np.uint8(size)
 
     def load_rom(self, rom: ROM):
         # unload old rom

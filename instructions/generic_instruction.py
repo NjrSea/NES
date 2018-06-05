@@ -9,7 +9,7 @@ class Instruction:
     sets_zero_bit = False
     sets_negative_bit = False
     sets_decimal_bit = False
-    sets_overflow_bit = False
+    sets_overflow_bit_from_value = False
     sets_interrupt_bit = False
     sets_carry_bit = False
 
