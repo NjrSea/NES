@@ -74,6 +74,14 @@ class CPU:
 
         # TODO memory sets
 
+    def stack_push(self, data_to_push: int, num_bytes: int = 1):
+        self.set_memory(self.sp_reg, data_to_push, num_bytes)
+        self.increase_stack_size(num_bytes)
+
+    def stack_pop(self, num_bytes: int = 1):
+        self.decrease_stack_size(num_bytes)
+        return self.get_memory(self.pc_reg, num_bytes)
+
     def get_memory(self, location: int, num_bytes: int = 1) -> int:
         """
         return a byte from a given memory location
