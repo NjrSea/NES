@@ -54,6 +54,8 @@ class CPU:
                 raise Exception('Duplicate instruction identifier bytes')
             self.instructions[instruction.identifier_byte] = instruction
 
+        self.stack =[]
+
     def start_up(self):
         """
         set the initial values of cpu registers
@@ -77,10 +79,14 @@ class CPU:
     def stack_push(self, data_to_push: int, num_bytes: int = 1):
         self.set_memory(self.sp_reg, data_to_push, num_bytes)
         self.increase_stack_size(num_bytes)
+        self.stack.append(hex(data_to_push))
+        print('stack push: ', self.stack)
 
     def stack_pop(self, num_bytes: int = 1):
         self.decrease_stack_size(num_bytes)
-        return self.get_memory(self.pc_reg, num_bytes)
+        print('stack pop: ', self.stack.pop(), self.stack)
+
+        return self.get_memory(self.sp_reg, num_bytes)
 
     def get_memory(self, location: int, num_bytes: int = 1) -> int:
         """

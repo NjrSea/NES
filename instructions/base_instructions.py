@@ -25,10 +25,7 @@ class Jsr(Jmp):
     @classmethod
     def write(cls, cpu: 'cpu.CPU', memory_address, value):
         # store the pc reg on the stack
-        cpu.set_memory(cpu.sp_reg, cpu.pc_reg, num_bytes=2)
-
-        # increases the size of the stack
-        cpu.increase_stack_size(2)
+        cpu.stack_push(cpu.pc_reg, 2)
 
         super().write(cpu, memory_address, value)
 
@@ -40,11 +37,8 @@ class Rts(Jmp):
     """
     @classmethod
     def write(cls, cpu: 'cpu.CPU', memory_address, value):
-        # decrease the size of the stack
-        cpu.decrease_stack_size(2)
-
         # grab the pc reg on the stack
-        old_pc_reg = cpu.get_memory(cpu.sp_reg, num_bytes=2)
+        old_pc_reg = cpu.stack_pop(2)
 
         # jump to the memory location
         super().write(cpu, old_pc_reg, value)
@@ -138,9 +132,7 @@ class StackPush(Instruction):
         data_to_push = cls.data_to_push(cpu)
 
         # write the status to the stack
-        cpu.set_memory(cpu.sp_reg, data_to_push, 1)
-
-        cpu.increase_stack_size(1)
+        cpu.stack_push(data_to_push, 1)
 
         return data_to_push
 
@@ -154,10 +146,8 @@ class StackPull(Instruction):
 
     @classmethod
     def write(cls, cpu: 'cpu.CPU', memory_address, value):
-        cpu.decrease_stack_size(1)
-
         # get the data from the stack
-        pulled_data = cpu.get_memory(cpu.sp_reg)
+        pulled_data = cpu.stack_pop()
 
         # write the pulled data
         return cls.write_pulled_data(cpu, pulled_data)
