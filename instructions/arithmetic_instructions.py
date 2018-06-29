@@ -1,8 +1,7 @@
 from addressing import ZeroPageAddressing, AbsoluteAddressing
-from helpers import generate_classes_from_string
-from instructions.base_instructions import Cmp, Bit, And, Or, Eor, Adc, Cpy, Cpx, Sbc
+from helpers import generate_classes_from_string, instruction_classes
+from instructions.base_instructions import Cmp, Bit, And, Or, Eor, Adc, Cpy, Cpx, Sbc, Lsr, Asl, Ror, Rol, Inc, Dec
 
-types = []
 
 # cmp instructions
 cmp_types = '''
@@ -17,7 +16,7 @@ absolute,Y    CMP oper,Y    D9    3     4*
 '''
 
 for generated in generate_classes_from_string(Cmp, cmp_types):
-    types.append(generated)
+    instruction_classes.append(generated)
 
 
 # cpy instructions
@@ -28,7 +27,7 @@ absolute      CPY oper      CC    3     4
 '''
 
 for generated in generate_classes_from_string(Cpy, cpy_types):
-    types.append(generated)
+    instruction_classes.append(generated)
 
 
 # cpx instructions
@@ -39,7 +38,7 @@ absolute      CPX oper      EC    3     4
 '''
 
 for generated in generate_classes_from_string(Cpx, cpx_types):
-    types.append(generated)
+    instruction_classes.append(generated)
 
 # and instructions
 and_types = '''
@@ -54,7 +53,7 @@ absolute,Y    AND oper,Y    39    3     4*
 '''
 
 for generated in generate_classes_from_string(And, and_types):
-    types.append(generated)
+    instruction_classes.append(generated)
 
 # or instructions
 or_types = '''
@@ -69,7 +68,7 @@ absolute,Y    ORA oper,Y    19    3     4*
 '''
 
 for generated in generate_classes_from_string(Or, or_types):
-    types.append(generated)
+    instruction_classes.append(generated)
 
 # eor instructions
 eor_types = '''
@@ -84,7 +83,7 @@ absolute,Y    EOR oper,Y    59    3     4*
 '''
 
 for generated in generate_classes_from_string(Eor, eor_types):
-    types.append(generated)
+    instruction_classes.append(generated)
 
 
 # adc instructions
@@ -100,7 +99,7 @@ absolute,Y    ADC oper,Y    79    3     4*
 '''
 
 for generated in generate_classes_from_string(Adc, adc_types):
-    types.append(generated)
+    instruction_classes.append(generated)
 
 
 # sbc instructions
@@ -116,4 +115,79 @@ absolute,Y    SBC oper,Y    F9    3     4*
 '''
 
 for generated in generate_classes_from_string(Sbc, sbc_types):
-    types.append(generated)
+    instruction_classes.append(generated)
+
+
+# lsr instructions
+lsr_types = '''
+accumulator   LSR A         4A    1     2
+zeropage      LSR oper      46    2     5
+zeropage,X    LSR oper,X    56    2     6
+absolute      LSR oper      4E    3     6
+absolute,X    LSR oper,X    5E    3     7
+'''
+
+for generated in generate_classes_from_string(Lsr, lsr_types):
+    instruction_classes.append(generated)
+
+
+# asl instructions
+asl_types = '''
+accumulator   ASL A         0A    1     2
+zeropage      ASL oper      06    2     5
+zeropage,X    ASL oper,X    16    2     6
+absolute      ASL oper      0E    3     6
+absolute,X    ASL oper,X    1E    3     7
+'''
+
+for generated in generate_classes_from_string(Asl, asl_types):
+    instruction_classes.append(generated)
+
+
+# ror instructions
+ror_types = '''
+accumulator   ROR A         6A    1     2
+zeropage      ROR oper      66    2     5
+zeropage,X    ROR oper,X    76    2     6
+absolute      ROR oper      6E    3     6
+absolute,X    ROR oper,X    7E    3     7
+'''
+
+for generated in generate_classes_from_string(Ror, ror_types):
+    instruction_classes.append(generated)
+
+# rol instructions
+rol_types = '''
+accumulator   ROL A         2A    1     2
+zeropage      ROL oper      26    2     5
+zeropage,X    ROL oper,X    36    2     6
+absolute      ROL oper      2E    3     6
+absolute,X    ROL oper,X    3E    3     7
+'''
+
+for generated in generate_classes_from_string(Rol, rol_types):
+    instruction_classes.append(generated)
+
+
+# inc
+types = []
+
+inc_types = '''
+zeropage      INC oper      E6    2     5
+zeropage,X    INC oper,X    F6    2     6
+absolute      INC oper      EE    3     6
+absolute,X    INC oper,X    FE    3     7
+'''
+
+for generated in generate_classes_from_string(Inc, inc_types):
+    instruction_classes.append(generated)
+
+dec_types = '''
+zeropage      DEC oper      C6    2     5
+zeropage,X    DEC oper,X    D6    2     6
+absolute      DEC oper      CE    3     3
+absolute,X    DEC oper,X    DE    3     7
+'''
+
+for generated in generate_classes_from_string(Dec, dec_types):
+    instruction_classes.append(generated)

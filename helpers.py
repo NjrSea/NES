@@ -5,10 +5,12 @@ import re
 
 from addressing import ImmediateReadAddressing, Addressing, ZeroPageAddressing, ZeroPageAddressingWithX, \
     AbsoluteAddressing, AbsoluteAddressingXOffset, AbsoluteAddressingYOffset, IndirectAddressingWithX, \
-    IndirectAddressingWithY, ZeroPageAddressingWithY
+    IndirectAddressingWithY, ZeroPageAddressingWithY, AccumulatorAdressing
 
 class_pattern = r'(\S*)\s*(\w*).{11}(\w*).*'
 compiled_class_pattern = re.compile(class_pattern)
+
+instruction_classes = []
 
 
 class Numbers(Enum):
@@ -40,6 +42,19 @@ def bytes_to_short(*, upper: int, lower: int) -> int:
     return (upper << 8) | lower
 
 
+def num_of_bytes_from_bytes(value: bytes) -> int:
+    value = int.from_bytes(value, byteorder='little')
+    return num_of_bytes_from_int(value)
+
+
+def num_of_bytes_from_int(value: int) -> int:
+    if value is None:
+        raise Exception('invalid value type of None')
+    if value <= 0xFF:
+        return 1
+    return 2
+
+
 def description_to_addressing(description: str) -> Addressing:
     """
     turns a string description into a addressing type
@@ -54,7 +69,8 @@ def description_to_addressing(description: str) -> Addressing:
         'absolute,X': AbsoluteAddressingXOffset,
         'absolute,Y': AbsoluteAddressingYOffset,
         '(indirect,X)': IndirectAddressingWithX,
-        '(indirect),Y': IndirectAddressingWithY
+        '(indirect),Y': IndirectAddressingWithY,
+        'accumulator': AccumulatorAdressing,
     }[description]
 
 

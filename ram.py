@@ -15,4 +15,3 @@ class RAM(MemoryOwnerMixin, object):
 
     def get_memory(self) -> List[int]:
         return self.memory
-

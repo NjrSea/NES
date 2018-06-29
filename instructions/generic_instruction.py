@@ -1,4 +1,5 @@
 from typing import Optional
+import helpers
 
 import cpu
 
@@ -25,6 +26,8 @@ class Instruction:
 
     @classmethod
     def get_data(cls, cpu: 'cpu.CPU', memory_address: int, data_bytes) -> Optional[int]:
+        if memory_address is not None:
+            return cpu.get_memory(memory_address)
         return None
 
     @classmethod
@@ -52,10 +55,4 @@ class WritesToMemory:
     def write(cls, cpu: 'cpu.CPU', memory_address, value):
         memory_owner = cpu._get_memory_owner(memory_address)
         memory_owner.set(position=memory_address, value=value)
-
-
-class ReadsFromMemory:
-    @classmethod
-    def get_data(cls, cpu: 'cpu.CPU', memory_address: int, data_bytes) -> Optional[int]:
-        return cpu.get_memory(memory_address)
 

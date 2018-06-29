@@ -56,6 +56,12 @@ class CPU:
 
         self.stack =[]
 
+        # These instructions are implied mode, have a length of one byte and require machine cycles as indicated.
+        # The "PuLl" operations are known as "POP" on most other microprocessors. With the 6502, the stack is always
+        # on page one ($100-$1FF) and works top down.
+        # http://www.6502.org/tutorials/6502opcodes.html
+        self.stack_offset = 0x100
+
     def start_up(self):
         """
         set the initial values of cpu registers
@@ -66,7 +72,7 @@ class CPU:
         $4017: 0 (sound chanel disabled)
         $4015: 0 (frame IRQ disabled)
         $4000-$400F: 0 (sound registers) """
-        self.pc_reg = 0  # 2 bytes
+        self.pc_reg = np.uint16(0)  # 2 bytes
         self.status_reg = Status()
         self.sp_reg = np.uint8(0xFD)
 
@@ -77,16 +83,16 @@ class CPU:
         # TODO memory sets
 
     def stack_push(self, data_to_push: int, num_bytes: int = 1):
-        self.set_memory(self.sp_reg, data_to_push, num_bytes)
+        self.set_memory(self.stack_offset + self.sp_reg, data_to_push, num_bytes)
         self.increase_stack_size(num_bytes)
         self.stack.append(hex(data_to_push))
         print('stack push: ', self.stack)
 
     def stack_pop(self, num_bytes: int = 1):
         self.decrease_stack_size(num_bytes)
-        print('stack pop: ', self.stack.pop(), self.stack)
-
-        return self.get_memory(self.sp_reg, num_bytes)
+        if self.stack.__len__() > 0:
+            print('stack pop: ', self.stack.pop(), self.stack)
+        return self.get_memory(self.stack_offset + self.sp_reg, num_bytes)
 
     def get_memory(self, location: int, num_bytes: int = 1) -> int:
         """
@@ -138,20 +144,32 @@ class CPU:
 
         # load rom
         self.rom = rom
-        self.pc_reg = 0xC000
+        self.pc_reg = np.uint16(0xC000)
 
         # load the rom program instructions into memory
         self.memory_owners.append(self.rom)
 
     def identify(self):
         identifier_byte = self._get_memory_owner(self.pc_reg).get(self.pc_reg)
+
+        if isinstance(identifier_byte, np.uint8):
+            identifier_byte = bytes([identifier_byte])
+
         self.instruction = self.instructions.get(identifier_byte, None)
 
         if self.instruction is None:
             raise Exception("Instruction not found: {}".format(identifier_byte.hex()))
 
         # get the data bytes
-        self.data_bytes = self.rom.get(self.pc_reg + 1, self.instruction.data_length)
+        if self.instruction.data_length > 0:
+            next_to_pc_reg = self.pc_reg + np.uint16(1)
+            self.data_bytes = self._get_memory_owner(next_to_pc_reg).get(next_to_pc_reg, self.instruction.data_length)
+
+            # check type
+            if isinstance(self.data_bytes, np.uint8):
+                self.data_bytes = bytes([self.data_bytes])
+        else:
+            self.data_bytes = bytes()
 
         # print out diagnostic information
         # example: C000  4C F5 C5  JMP $C5F5                A:00 X:00 Y:00 P:24 SP:FD CYC:0
@@ -165,7 +183,7 @@ class CPU:
                                                                  hex(self.sp_reg)))
 
     def execute(self):
-        self.pc_reg += self.instruction.get_instruction_length()
+        self.pc_reg += np.uint16(self.instruction.get_instruction_length())
 
         value = self.instruction.execute(self, self.data_bytes)
 

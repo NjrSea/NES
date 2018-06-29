@@ -1,7 +1,6 @@
-from helpers import generate_classes_from_string
+from helpers import generate_classes_from_string, instruction_classes
 from instructions.base_instructions import Lda, Ldx, Ldy
 
-types = []
 
 lda_types = '''
 immidiate     LDA #oper     A9    2     2
@@ -15,7 +14,7 @@ absolute,Y    LDA oper,Y    B9    3     4*
 '''
 
 for generated in generate_classes_from_string(Lda, lda_types):
-    types.append(generated)
+    instruction_classes.append(generated)
 
 
 ldx_types = '''
@@ -27,7 +26,7 @@ absolute,Y    LDX oper,Y    BE    3     4*
 '''
 
 for generated in generate_classes_from_string(Ldx, ldx_types):
-    types.append(generated)
+    instruction_classes.append(generated)
 
 
 ldy_types = '''
@@ -39,5 +38,5 @@ absolute,X    LDY oper,X    BC    3     4*
 '''
 
 for generated in generate_classes_from_string(Ldy, ldy_types):
-    types.append(generated)
+    instruction_classes.append(generated)
 

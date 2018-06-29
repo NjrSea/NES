@@ -3,8 +3,9 @@ from typing import Optional
 import numpy as np
 
 from addressing import ImplicitAddressing, RelativeAddressing
-from instructions.generic_instruction import Instruction, WritesToMemory, ReadsFromMemory
+from instructions.generic_instruction import Instruction, WritesToMemory
 from status import Status
+from helpers import Numbers
 
 
 class Jmp(Instruction):
@@ -14,7 +15,7 @@ class Jmp(Instruction):
     """
     @classmethod
     def write(cls, cpu: 'cpu.CPU', memory_address, value):
-        cpu.pc_reg = memory_address
+        cpu.pc_reg = np.uint16(memory_address)
 
 
 class Jsr(Jmp):
@@ -25,7 +26,7 @@ class Jsr(Jmp):
     @classmethod
     def write(cls, cpu: 'cpu.CPU', memory_address, value):
         # store the pc reg on the stack
-        cpu.stack_push(cpu.pc_reg, 2)
+        cpu.stack_push(cpu.pc_reg - np.uint16(1), 2)
 
         super().write(cpu, memory_address, value)
 
@@ -38,6 +39,46 @@ class Rts(Jmp):
     @classmethod
     def write(cls, cpu: 'cpu.CPU', memory_address, value):
         # grab the pc reg on the stack
+        old_pc_reg = cpu.stack_pop(2) + np.uint16(1)
+
+        # jump to the memory location
+        super().write(cpu, old_pc_reg, value)
+
+
+class Brk(Instruction):
+    """
+    push PC+2, push SR
+    N Z C I D V
+    - - - 1 - -
+    """
+    @classmethod
+    def write(cls, cpu, memory_address, value):
+        # increment pc reg
+        cpu.pc_reg += np.uint16(1)
+
+        # store the pc reg onto the stack
+        cpu.set_stack_value(cpu.pc_reg, Numbers.SHORT.value)
+
+        # store the status on the stack
+        status = cpu.status_reg.to_int()
+        cpu.set_stack_value(status)
+
+        # set interrupt bit to be true
+        cpu.status_reg.bits[Status.StatusTypes.interrupt] = True
+
+
+class Rti(Jmp):
+    """
+    N Z C I D V
+    from stack
+    """
+    @classmethod
+    def write(cls, cpu: 'cpu.CPU', memory_address, value):
+        # get the stored status from stack, and then set the status reg
+        status = cpu.stack_pop(1)
+        cpu.status_reg.from_int(status, [4, 5])
+
+        # grab the stored pc reg from the stack (note: is exact pc_reg not pc_reg+1)
         old_pc_reg = cpu.stack_pop(2)
 
         # jump to the memory location
@@ -52,7 +93,7 @@ class Nop(Instruction):
     pass
 
 
-class Ld(ReadsFromMemory, Instruction):
+class Ld(Instruction):
     """
     N Z C I D V
     + + - - - -
@@ -239,6 +280,135 @@ class Sbc(Adc):
         return super().write(cpu, memory_address, value ^ 0xFF)
 
 
+class Shift(Instruction):
+    """
+    Shifts bits
+    N Z C I D V
+    + + + - - -
+    """
+    sets_zero_bit = True
+    sets_negative_bit = True
+
+    @classmethod
+    def write(cls, cpu, memory_address, value):
+        # shift bits
+        if memory_address is None:
+            cpu.a_reg = value
+        else:
+            cpu.set_memory(memory_address, value, Numbers.BYTE.value)
+
+        return value
+
+
+class Lsr(Shift):
+    """
+    Shifts bits right
+    N Z C I D V
+    + + + - - -
+    LSR shifts all bits right one position. 0 is shifted into bit 7 and the original bit 0 is shifted into the Carry.
+    """
+    sets_zero_bit = True
+    sets_negative_bit = True
+
+    @classmethod
+    def write(cls, cpu, memory_address, value):
+        # shift bits
+        updated_value = np.uint8(cpu.a_reg >> 1)
+        # set the carry reg
+        cpu.status_reg.bits[Status.StatusTypes.carry] = bool(value & 0b1)
+
+        return super().write(cpu, memory_address, updated_value)
+
+
+class Asl(Shift):
+    """
+    Shifts bits left
+    ASL shifts all bits left one position. 0 is shifted into bit 0 and the original bit 7 is shifted into the Carry.
+    """
+    @classmethod
+    def write(cls, cpu, memory_address, value):
+        # shift bits
+        a_reg_without_7 = value & 0b01111111
+        updated_value = np.uint8(a_reg_without_7 << 1)
+        # set the carry reg
+        original_bit_7 = (value & 0b10000000) >> 7
+        cpu.status_reg.bits[Status.StatusTypes.carry] = bool(original_bit_7)
+        return super().write(cpu, memory_address, updated_value)
+
+
+class Ror(Shift):
+    """
+    Shifts bits right
+    ROR shifts all bits right one position. The Carry is shifted into bit 7 and the original bit 0 is shifted into the Carry.
+    """
+    @classmethod
+    def write(cls, cpu, memory_address, value):
+        # shift bits
+        shifted_bits_without_7 = np.uint8(cpu.a_reg >> 1)
+        shifted_carry = int(cpu.status_reg.bits[Status.StatusTypes.carry]) << 7
+        updated_value = np.uint8(shifted_bits_without_7 | shifted_carry)
+        # set the carry reg
+        cpu.status_reg.bits[Status.StatusTypes.carry] = bool(value & 0b1)
+        return super().write(cpu, memory_address, updated_value)
+
+
+class Rol(Shift):
+    """
+    Shifts bits left
+    ROL shifts all bits left one position. The Carry is shifted into bit 0 and the original bit 7 is shifted into the Carry.
+    N Z C I D V
+    + + + - - -
+    """
+    sets_zero_bit = True
+    sets_negative_bit = True
+
+    @classmethod
+    def write(cls, cpu, memory_address, value):
+        # shift bits
+        a_reg_without_7 = cpu.a_reg & 0b01111111
+        shifted_bits_without_0 = a_reg_without_7 << 1
+        shifted_carry = int(cpu.status_reg.bits[Status.StatusTypes.carry])
+        updated_value = np.uint8(shifted_bits_without_0 | shifted_carry)
+        # set the carry reg
+        original_bit_7 = (value & 0b10000000) >> 7
+        cpu.status_reg.bits[Status.StatusTypes.carry] = bool(original_bit_7)
+        return super().write(cpu, memory_address, updated_value)
+
+
+class Inc(Instruction):
+    """
+    increment memory by 1
+    N Z C I D V
+    + + - - - -
+    """
+    sets_negative_bit = True
+    sets_zero_bit = True
+
+    @classmethod
+    def write(cls, cpu: 'cpu.CPU', memory_address, value):
+        original_value = np.uint8(cpu.get_memory(memory_address))
+        updated_value = original_value + np.uint8(1)
+        cpu.set_memory(memory_address, updated_value)
+        return updated_value
+
+
+class Dec(Instruction):
+    """
+    increment memory by 1
+    N Z C I D V
+    + + - - - -
+    """
+    sets_negative_bit = True
+    sets_zero_bit = True
+
+    @classmethod
+    def write(cls, cpu: 'cpu.CPU', memory_address, value):
+        original_value = np.uint8(cpu.get_memory(memory_address))
+        updated_value = original_value - np.uint8(1)
+        cpu.set_memory(memory_address, updated_value)
+        return updated_value
+
+
 class Compare(Instruction):
     """
     compare given value with a given reg
@@ -261,7 +431,7 @@ class Cmp(Compare):
     """
     @classmethod
     def write(cls, cpu, memory_address, value):
-        result = cpu.a_reg - value
+        result = int(cpu.a_reg) - value
         return super().write(cpu, memory_address, result)
 
 
@@ -271,7 +441,7 @@ class Cpx(Compare):
     """
     @classmethod
     def write(cls, cpu, memory_address, value):
-        result = cpu.x_reg - value
+        result = int(cpu.x_reg) - value
         return super().write(cpu, memory_address, result)
 
 
@@ -281,7 +451,7 @@ class Cpy(Compare):
     """
     @classmethod
     def write(cls, cpu, memory_address, value):
-        result = cpu.y_reg - value
+        result = int(cpu.y_reg) - value
         return super().write(cpu, memory_address, result)
 
 
@@ -319,7 +489,7 @@ class BranchClear(RelativeAddressing, Jmp):
             super().write(cpu, memory_address, value)
 
 
-class Bit(ReadsFromMemory, Instruction):
+class Bit(Instruction):
     """
     bits 7 and 6 of operand are transfered to bit 7 and 6 of SR (N,V);
     the zeroflag is set to the result of operand AND accumulator.

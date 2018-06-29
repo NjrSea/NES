@@ -62,7 +62,7 @@ class Status:
             value += int(bit) * math.pow(2, i)
         return int(value)
 
-    def from_int(self, value: int, bits_to_ignore: List[int]):
+    def from_int(self, value: int, bits_to_ignore: List[int] = []):
         for i, key in enumerate(self.bits.keys()):
             if i in bits_to_ignore:
                 continue
