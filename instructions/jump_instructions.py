@@ -1,4 +1,4 @@
-from addressing import AbsoluteAddressing, IndirectAddressing, ImplicitAddressing
+from addressing import AbsoluteAddressing, IndirectAddressing, ImpliedAddressing
 from instructions.base_instructions import Jmp, Jsr, Rts, Rti
 
 
@@ -14,13 +14,13 @@ class JsrAbs(AbsoluteAddressing, Jsr):
     identifier_byte = bytes([0x20])
 
 
-class RtsImp(ImplicitAddressing, Rts):
+class RtsImp(ImpliedAddressing, Rts):
     identifier_byte = bytes([0x60])
 
 
-class RtiImp(ImplicitAddressing, Rti):
+class RtiImp(ImpliedAddressing, Rti):
     identifier_byte = bytes([0x40])
 
 
-class BrkImp(ImplicitAddressing, Jmp):
+class BrkImp(ImpliedAddressing, Jmp):
     identifier_byte = bytes([0x00])

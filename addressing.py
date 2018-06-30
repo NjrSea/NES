@@ -155,7 +155,7 @@ class Addressing(object):
         return 0
 
 
-class ImplicitAddressing(Addressing):
+class ImpliedAddressing(Addressing):
     """
     instructions that have data passed
     example: CLD
@@ -270,8 +270,8 @@ class RelativeAddressing(Addressing):
         # get the program counter
         current_address = cpu.pc_reg
 
-        # offset by value in instructions
-        return current_address + np.uint16(int.from_bytes(data_bytes, byteorder='little'))
+        # offset by value in instructions, signed 8 bit vlalue
+        return current_address + np.int8(int.from_bytes(data_bytes, byteorder='little'))
 
 
 class IndirectBase(Addressing):

@@ -1,12 +1,12 @@
 import numpy as np
 
-from addressing import ImplicitAddressing
+from addressing import ImpliedAddressing
 from instructions.generic_instruction import Instruction
 from instructions.base_instructions import StackPush, StackPull
 
 
 # stack push instructions
-class Php(ImplicitAddressing, StackPush):
+class Php(ImpliedAddressing, StackPush):
     identifier_byte = bytes([0x08])
 
     @classmethod
@@ -14,7 +14,7 @@ class Php(ImplicitAddressing, StackPush):
         return cpu.status_reg.to_int() | 0b110000
 
 
-class Pha(ImplicitAddressing, StackPush):
+class Pha(ImpliedAddressing, StackPush):
     """
     N Z C I D V
     - - - - - -
@@ -26,7 +26,7 @@ class Pha(ImplicitAddressing, StackPush):
         return cpu.a_reg
 
 
-class Txs(ImplicitAddressing, Instruction):
+class Txs(ImpliedAddressing, Instruction):
     # TODO:
     # sets_negative_bit = True
     sets_zero_bit = True
@@ -40,7 +40,7 @@ class Txs(ImplicitAddressing, Instruction):
 
 
 # stack pull instructions
-class Plp(ImplicitAddressing, StackPull):
+class Plp(ImpliedAddressing, StackPull):
     """
     sets the stack
     ignores bits 4 and 5
@@ -52,7 +52,7 @@ class Plp(ImplicitAddressing, StackPull):
         cpu.status_reg.from_int(pulled_data, [4, 5])
 
 
-class Pla(ImplicitAddressing, StackPull):
+class Pla(ImpliedAddressing, StackPull):
     sets_negative_bit = True
     sets_zero_bit = True
 
@@ -64,7 +64,7 @@ class Pla(ImplicitAddressing, StackPull):
         return cpu.a_reg
 
 
-class Tsx(ImplicitAddressing, Instruction):
+class Tsx(ImpliedAddressing, Instruction):
     sets_negative_bit = True
     sets_zero_bit = True
 

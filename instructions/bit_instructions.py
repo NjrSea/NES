@@ -1,6 +1,6 @@
 from addressing import ZeroPageAddressing, AbsoluteAddressing, ImmediateReadAddressing, ZeroPageAddressingWithX,\
     AbsoluteAddressingXOffset, AbsoluteAddressingYOffset, IndirectAddressingWithX, IndirectAddressingWithY, \
-    ImplicitAddressing
+    ImpliedAddressing
 from instructions.base_instructions import Bit, And, RegisterModifier
 import numpy as np
 
@@ -14,7 +14,7 @@ class BitAbs(AbsoluteAddressing, Bit):
 
 
 # register instructions
-class Iny(ImplicitAddressing, RegisterModifier):
+class Iny(ImpliedAddressing, RegisterModifier):
     identifier_byte = bytes([0xC8])
 
     @classmethod
@@ -23,7 +23,7 @@ class Iny(ImplicitAddressing, RegisterModifier):
         return cpu.y_reg
 
 
-class Dey(ImplicitAddressing, RegisterModifier):
+class Dey(ImpliedAddressing, RegisterModifier):
     identifier_byte = bytes([0x88])
 
     @classmethod
@@ -32,7 +32,7 @@ class Dey(ImplicitAddressing, RegisterModifier):
         return cpu.y_reg
 
 
-class Inx(ImplicitAddressing, RegisterModifier):
+class Inx(ImpliedAddressing, RegisterModifier):
     identifier_byte = bytes([0xE8])
 
     @classmethod
@@ -41,7 +41,7 @@ class Inx(ImplicitAddressing, RegisterModifier):
         return cpu.x_reg
 
 
-class Dex(ImplicitAddressing, RegisterModifier):
+class Dex(ImpliedAddressing, RegisterModifier):
     identifier_byte = bytes([0xCA])
 
     @classmethod
@@ -50,7 +50,7 @@ class Dex(ImplicitAddressing, RegisterModifier):
         return cpu.x_reg
 
 
-class Tax(ImplicitAddressing, RegisterModifier):
+class Tax(ImpliedAddressing, RegisterModifier):
     identifier_byte = bytes([0xAA])
 
     @classmethod
@@ -59,7 +59,7 @@ class Tax(ImplicitAddressing, RegisterModifier):
         return cpu.x_reg
 
 
-class Txa(ImplicitAddressing, RegisterModifier):
+class Txa(ImpliedAddressing, RegisterModifier):
     identifier_byte = bytes([0x8A])
 
     @classmethod
@@ -68,7 +68,7 @@ class Txa(ImplicitAddressing, RegisterModifier):
         return cpu.a_reg
 
 
-class Tay(ImplicitAddressing, RegisterModifier):
+class Tay(ImpliedAddressing, RegisterModifier):
     identifier_byte = bytes([0xA8])
 
     @classmethod
@@ -77,7 +77,7 @@ class Tay(ImplicitAddressing, RegisterModifier):
         return cpu.y_reg
 
 
-class Tya(ImplicitAddressing, RegisterModifier):
+class Tya(ImpliedAddressing, RegisterModifier):
     identifier_byte = bytes([0x98])
 
     @classmethod

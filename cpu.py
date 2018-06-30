@@ -1,3 +1,4 @@
+from apu import APU
 from instructions.generic_instruction import Instruction
 from memory_owner import MemoryOwnerMixin
 from ppu import PPU
@@ -15,10 +16,11 @@ import instructions.store_instructions as s_file
 import instructions.bit_instructions as bit_file
 import instructions.stack_instructions as stack_file
 import instructions.arithmetic_instructions as a_file
+import instructions.combination_instructions as c_file
 
 
 class CPU:
-    def __init__(self, ram: RAM, ppu: PPU):
+    def __init__(self, ram: RAM, ppu: PPU, apu: APU):
         # status registers: store a single byte
         self.status_reg = None  # type: Status
 
@@ -37,10 +39,12 @@ class CPU:
         self.rom = None  # type: ROM
         self.ram = ram
         self.ppu = ppu
+        self.apu = apu
 
         self.memory_owners = [  # type: List[MemoryOwnerMixin]
             self.ram,
             self.ppu,
+            self.apu,
         ]
 
         self.instruction = None
@@ -137,14 +141,17 @@ class CPU:
         """
         self.sp_reg += np.uint8(size)
 
-    def load_rom(self, rom: ROM):
+    def load_rom(self, rom: ROM, testing):
         # unload old rom
         if self.rom is not None:
             self.memory_owners.remove(self.rom)
 
         # load rom
         self.rom = rom
-        self.pc_reg = np.uint16(0xC000)
+        if testing:
+            self.pc_reg = np.uint16(0xC000)
+        else:
+            self.pc_reg = np.uint16(int.from_bytes(self.get_memory(0xFFFC, 2), byteorder='little'))
 
         # load the rom program instructions into memory
         self.memory_owners.append(self.rom)
